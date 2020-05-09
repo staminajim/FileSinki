@@ -2,7 +2,8 @@
 //  FileSinki.h
 //  FileSinki
 //
-//  Created by James Van-As on 9/05/20.
+//  Created by James Van-As on 10/05/20.
+//  Copyright © 2020 James Van-As. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
