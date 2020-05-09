@@ -10,11 +10,11 @@ import Foundation
 
 internal class ReachabilityManager {
 
-    private let reachability: Reachability
+    private let reachability: Reachability?
 
     init() {
         reachability = Reachability.forInternetConnection()
-        reachability.startNotifier()
+        reachability?.startNotifier()
 
         NotificationCenter.default.addObserver(self, selector: #selector(reachabilityChanged(_:)),
                                                name: .reachabilityChanged, object: nil)
@@ -37,7 +37,7 @@ internal class ReachabilityManager {
     }
 
     @objc func reachabilityChanged(_ notification: Notification?) {
-        if reachability.currentReachabilityStatus() != NotReachable {
+        if reachability?.status != .notReachable {
             runOnMain {
                 self.runAllRetries()
             }
