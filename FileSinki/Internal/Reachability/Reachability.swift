@@ -67,11 +67,11 @@ internal class Reachability {
                                                    copyDescription: nil)
 
         guard SCNetworkReachabilitySetCallback(scReachability, Reachability.callback, &context) else { return false }
-        return SCNetworkReachabilityScheduleWithRunLoop(scReachability, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode as! CFString)
+        return SCNetworkReachabilityScheduleWithRunLoop(scReachability, CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
     }
 
     @discardableResult func stopNotifier() -> Bool {
-        SCNetworkReachabilityUnscheduleFromRunLoop(scReachability,  CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode as! CFString)
+        SCNetworkReachabilityUnscheduleFromRunLoop(scReachability,  CFRunLoopGetCurrent(), CFRunLoopMode.defaultMode.rawValue)
     }
 
     // MARK: - Status
