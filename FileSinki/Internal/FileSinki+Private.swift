@@ -12,7 +12,7 @@
 
 import Foundation
 
-public class FileSinki {
+@objc public class FileSinki: NSObject {
     
     internal static var cloudKitManager: CloudKitManager!
     internal static let localDB = LocalDatabase()
@@ -24,9 +24,14 @@ public class FileSinki {
 
     public typealias GenericChanged = ((_ changedItems: [ChangeItemGeneric]) -> Void)
 
-    public struct ChangeItemGeneric {
-        public let localURL: URL
-        public let path: String
+    @objc(ChangeItem) public class ChangeItemGeneric: NSObject {
+        @objc public let localURL: URL
+        @objc public let path: String
+
+        init(localURL: URL, path: String) {
+            self.localURL = localURL
+            self.path = path
+        }
     }
 
     public struct ChangeItem<T: FileSyncable> {

@@ -15,7 +15,7 @@ import Compression
 
 // MARK: - FileSinki Setup
 
-public extension FileSinki {
+@objc public extension FileSinki {
 
     /**
        Initializes FileSinki. Call in AppDelegate didFinishLaunching with your CloudKit Container ID
@@ -24,7 +24,7 @@ public extension FileSinki {
 
        Note that by default Mac CloudKit Container IDs match with iOS / tvOS, so you need to specify the exact ID.
     */
-    static func setup(cloudKitContainer: String) {        
+    @objc static func setup(cloudKitContainer: String) {
         cloudKitManager = CloudKitManager(cloudKitContainer: cloudKitContainer, localDB: localDB)
         observerManager = ObserverManager(cloudKitManager: cloudKitManager, localDB: localDB)
     }
@@ -32,7 +32,7 @@ public extension FileSinki {
     /**
        Call FileSinki.didBecomeActive() in applicationDidBecomeActive in your AppDelegate to sync updates that happened while in the background
     */
-    static func didBecomeActive() {
+    @objc static func didBecomeActive() {
          FileSinki.observerManager.didBecomeActive()
     }
 
@@ -41,7 +41,7 @@ public extension FileSinki {
 
        - Parameter notificationPayload: The didReceiveRemoteNotification `userInfo: [String : Any]` payload received in AppDelegate
     */
-    static func receivedNotification(_ notificationPayload: [AnyHashable : Any]) {
+    @objc static func receivedNotification(_ notificationPayload: [AnyHashable : Any]) {
          FileSinki.observerManager.receivedNotification(notificationPayload)
     }
 
@@ -57,7 +57,6 @@ public extension FileSinki {
 
     - Parameter item: Item to save
     - Parameter toPath: local path of the item, relative to the root
-    - Parameter saveToCloud: If true, also saves the file to the cloud.
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     - Parameter finalVersion: If the final version saved to the cloud is different to the one passed in (due to a merge or better available version)
      the final version is passed to this closure
@@ -118,7 +117,6 @@ public extension FileSinki {
 
     - Parameter item: Item to save
     - Parameter toPath: local path of the item, relative to the root
-    - Parameter saveToCloud: If true, also saves the file to the cloud.
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     - Parameter finalVersion: If the final version saved to the cloud is different to the one passed in (due to a merge or better available version)
      the final version is passed to this closure
@@ -178,14 +176,14 @@ public extension FileSinki {
 
 // MARK: - Loading and Saving Binary Files
 
-public extension FileSinki {
+@objc public extension FileSinki {
 
     // MARK: Uncompressed
     /**
     Saves the data item locally for a given local file URL, and also saves to the Cloud
 
     - Parameter data: binary data to save
-    - Parameter toPath: local path of the item, relative to the root
+    - Parameter path: local path of the item, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter finalVersion: If the final version saved to the cloud is different to the one passed in (due to a merge or better available version)
@@ -210,7 +208,7 @@ public extension FileSinki {
     /**
     Loads the data item locally for a given local relative file path, and also loads from the Cloud.
 
-    - Parameter fromPath: local path of the data, relative to the root
+    - Parameter path: local path of the data, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter loaded: The Decoded data. nil if no item has been successfully decoded.
@@ -235,7 +233,7 @@ public extension FileSinki {
        Deletes the FileSyncable locally for a given local file URL, and also saves the deletion to the Cloud
 
        - Parameter data: The item to delete
-       - Parameter at: local path of the item, relative to the root
+       - Parameter path: local path of the item, relative to the root
        - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     */
     static func deleteBinaryFile(data: Data,
@@ -250,8 +248,7 @@ public extension FileSinki {
     Compressed as Saves the data item locally for a given local relative file path, and also saves to the Cloud
 
     - Parameter data: data to save
-    - Parameter toPath: local path of the item, relative to the root
-    - Parameter saveToCloud: If true, also saves the file to the cloud.
+    - Parameter path: local path of the item, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter finalVersion: If the final version saved to the cloud is different to the one passed in (due to a merge or better available version)
@@ -276,7 +273,7 @@ public extension FileSinki {
     /**
     Loads the compressed data item locally for a given local relative file path, and also loads from the Cloud.
 
-    - Parameter fromPath: local path of the item, relative to the root
+    - Parameter path: local path of the item, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter loaded: The Decoded item. nil if no item has been successfully decoded.
@@ -301,7 +298,7 @@ public extension FileSinki {
        Deletes the compressed data locally for a given local file URL, and also saves the deletion to the Cloud
 
        - Parameter data: The data to delete
-       - Parameter at: local path of the item, relative to the root
+       - Parameter path: local path of the item, relative to the root
        - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
     */
     static func deleteBinaryFileCompressed(_ data: Data,
@@ -321,13 +318,11 @@ public extension FileSinki {
        Observes remote changes to the given path. If the path is a folder, (ending in trailing "/") any files in that folder
         will be observed. If the path is not a folder, only changes to the specific file path will be observed.
 
-        When receiveing the local urls which have changed, For each item you can then decide to load new copies etc etc
-
        - Parameter observer: The object which wishes to observe the FileSinki changes.
        - Parameter for fileSyncableType: The FileSyncable type to observe changes for
        - Parameter path: The FileSinki path to oberve. eg "DataFolder/somefile.json" or "DataFolder/"
        - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
-       - Parameter localURLsChanged: Closure which is called any time remote changes to the given path occur
+       - Parameter itemsChanged: Closure which is called any time remote changes to the given path occur
     */
     static func addObserver<T: FileSyncable>(_ observer: AnyObject,
                                              for fileSyncableType: T.Type,
@@ -340,9 +335,31 @@ public extension FileSinki {
 
 }
 
+@objc public extension FileSinki {
+
+    /**
+       Observes remote changes to the given path. If the path is a folder, (ending in trailing "/") any files in that folder
+        will be observed. If the path is not a folder, only changes to the specific file path will be observed.
+
+        When receiveing the local urls which have changed, For each item you can then decide to load new copies etc etc
+
+       - Parameter observer: The object which wishes to observe the FileSinki changes.
+       - Parameter path: The FileSinki path to oberve. eg "DataFolder/somefile.json" or "DataFolder/"
+       - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
+       - Parameter itemsChanged: Closure which is called any time remote changes to the given path occur
+    */
+    static func addObserver(_ observer: AnyObject,
+                            path: String,
+                            root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
+                            itemsChanged: @escaping FileSinki.GenericChanged) {
+        FileSinki.observerManager.addObserver(self, path: path, root: root, onChange: itemsChanged)
+    }
+
+}
+
 // MARK: - Root Folder
 
-public extension FileSinki {
+@objc public extension FileSinki {
 
     /// The default local root folder that FileSinki will use. Application Support/com.blaa.app/ on iOS and OSX, and Cache//com.blaa.app/ on tvOS
     static var defaultRootFolder: URL {
