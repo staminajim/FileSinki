@@ -52,13 +52,7 @@ struct SaveGame: FileSyncable, FileMergable {
     let trophies: [Trophy]
 
     func merge(with other: Self) -> Self? {
-        var combinedTrophies = trophies
-        for trophy in other.trophies {
-            if !combinedTrophies.contains(trophy) {
-                combinedTrophies.append(trophy)
-            }
-        }
-        combinedItems.sort()
+        let combinedTrophies = (trophies + other.trophies).sorted()
         return SaveGame(trophies: combinedTrophies)
     }
 }
