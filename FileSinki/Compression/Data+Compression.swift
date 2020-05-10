@@ -9,7 +9,7 @@
 import Foundation
 import Compression
 
-extension Data {
+public extension Data {
 
     /**
     Syncronously saves the data locally for a given local file URL

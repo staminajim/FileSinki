@@ -11,7 +11,7 @@ import Compression
 
 // MARK: - Default Implementations
 
-extension FileSyncable {
+public extension FileSyncable {
 
     // default implementation just uses the non interactive version
     func interactiveShouldOverwrite(other: Self, keep: @escaping ShouldOverwriteClosure) {
@@ -44,7 +44,7 @@ extension FileSyncable {
 
 }
 
-extension FileSyncable where Self: Comparable {
+public extension FileSyncable where Self: Comparable {
 
     // default implementation does nothing, and so falls back to no merging using Comparable.
     func shouldOverwrite(other: Self) -> Bool {
@@ -53,7 +53,7 @@ extension FileSyncable where Self: Comparable {
 
 }
 
-extension FileMergable where Self: FileSyncable {
+public extension FileMergable where Self: FileSyncable {
 
     // default implementation returns false as we want to perform a merge
     func shouldOverwrite(other: Self) -> Bool {

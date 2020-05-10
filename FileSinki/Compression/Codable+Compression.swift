@@ -11,7 +11,7 @@ import Compression
 
 // MARK: - Local Saving and loading
 
-extension Encodable {
+public extension Encodable {
 
     /**
     Syncronously saves the Encodable item locally for a given local file URL
@@ -53,7 +53,7 @@ extension Encodable {
 
 }
 
-internal extension Decodable {
+public extension Decodable {
 
     /**
     Syncronously loads the local copy of Decodable item for a given local file URL

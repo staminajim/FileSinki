@@ -81,7 +81,7 @@ FileMergable
 
 Inherit from FileMergable and implement either `merge(with other:)` or `interactiveMerge(with:)` to allow for merge operations
 */
-protocol FileMergable {
+public protocol FileMergable {
     // inherit from FileMergable and implement
     //  merge(with other:) or interactiveMerge(with:)
     //  to allow for merge operations

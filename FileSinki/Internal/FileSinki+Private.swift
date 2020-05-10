@@ -21,14 +21,14 @@ public class FileSinki {
     public typealias GenericChanged = ((_ changedItems: [ChangeItemGeneric]) -> Void)
 
     public struct ChangeItemGeneric {
-        let localURL: URL
-        let path: String
+        public let localURL: URL
+        public let path: String
     }
 
     public struct ChangeItem<T: FileSyncable> {
-        let item: T
-        let localURL: URL
-        let path: String
+        public let item: T
+        public let localURL: URL
+        public let path: String
         
         public typealias Changed = ((_ changedItem: FileSinki.ChangeItem<T>) -> Void)
     }
