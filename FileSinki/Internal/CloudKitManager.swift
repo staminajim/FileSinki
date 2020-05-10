@@ -50,7 +50,7 @@ internal class CloudKitManager {
                             compression: compression_algorithm?,
                             finalVersion: @escaping (_ item: T) -> ()) where T: FileSyncable {
         guard let cloudPath = fileURL.cloudPath(for: searchPathDirectory) else {
-            DebugAssert(false, "Failed to get fileSinki file cloud path for \(fileURL)")
+            DebugAssert(false, "Failed to get cloud path for \(fileURL)")
             return
         }
 
@@ -75,7 +75,7 @@ internal class CloudKitManager {
                               data: Data,
                               compression: compression_algorithm?) where T: FileSyncable {
         guard let cloudPath = fileURL.cloudPath(for: searchPathDirectory) else {
-            DebugAssert(false, "Failed to get fileSinki file cloud path for \(fileURL)")
+            DebugAssert(false, "Failed to get cloud path for \(fileURL)")
             return
         }
 
@@ -104,7 +104,7 @@ internal class CloudKitManager {
                            compression: compression_algorithm?,
                            onReceive: @escaping ReceivedDataClosure) where T: FileSyncable {
         guard let cloudPath = fileURL.cloudPath(for: searchPathDirectory) else {
-            DebugAssert(false, "Failed to get fileSinki file cloud path for \(fileURL)")
+            DebugAssert(false, "Failed to get cloud path for \(fileURL)")
             return
         }
 
@@ -129,13 +129,13 @@ internal class CloudKitManager {
                 }
 
                 guard let path = fileSinkiRecord.value(forKey: RecordKey.path.rawValue) as? String else {
-                    DebugAssert(false, "CloudKit FileSinki record \(cloudPath) missing path value")
+                    DebugAssert(false, "CloudKit record \(cloudPath) missing path value")
                     onReceive(cloudPath, nil, false)
                     return
                 }
 
                 guard let fileSinkiData: Data = fileSinkiRecord.extractData() else {
-                    DebugAssert(false, "CloudKit FileSinki record \(cloudPath) missing data value")
+                    DebugAssert(false, "CloudKit record \(cloudPath) missing data value")
                                 onReceive(cloudPath, nil, false)
                     return
                 }
@@ -571,7 +571,7 @@ internal class CloudKitManager {
             }
 
             runOnMain {
-                DebugLog("CloudKit Zone ready for FileSinki")
+                DebugLog("CloudKit Zone ready")
 
                 let copy = self.onZoneLoaded
                 self.onZoneLoaded.removeAll()
@@ -630,7 +630,7 @@ fileprivate extension CKRecord {
             let data = try? Data(contentsOf: assetFileURL) {
             return data
         } else {
-            DebugAssert(false, "CloudKit FileSinki record \(self) missing data value")
+            DebugAssert(false, "CloudKit record \(self) missing data value")
             return nil
         }
     }
