@@ -46,6 +46,7 @@ FileSinki.delete(saveGame, at: "SaveGames/player1.save")
 ### Mergables
 
 Adopt the FileMergable and implement `merge(with:)` to merge FileSyncables between devices.
+Return the new merged object / struct which will be used.
 
 ```swift
 struct SaveGame: FileSyncable, FileMergable {
@@ -57,4 +58,4 @@ struct SaveGame: FileSyncable, FileMergable {
     }
 }
 ```
-If your return nil from `merge(with:)` then FileSinki falls back to `shouldOverwrite(other:)`
+If you return nil from `merge(with:)` then FileSinki falls back to `shouldOverwrite(other:)`
