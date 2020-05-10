@@ -60,15 +60,15 @@ struct SaveGame: FileSyncable, FileMergable {
 ```
 If you return nil from `merge(with:)` then FileSinki falls back to `shouldOverwrite(other:)`
 
-### Interactive Selection / Merging
+### Interactive / Asynchronous Selection and Merging
 
 If your decisions whether to overwrite / how to merge are more involved and require either user intervention or asynchromous work, implement one of the following functions:
 
 ```swift
 extension SaveGame: FileSyncable {
 
-    func interactiveShouldOverwrite(other: SaveGame,
-                                    keep: @escaping ShouldOverwriteClosure) {
+    func shouldOverwriteAsync(other: SaveGame,
+                              keep: @escaping ShouldOverwriteClosure) {
         // Do any kind of async decision making necessary.
         // You just have to call keep() with the version you want to keep
         SomeUserPrompt.chooseBetween(self, other) { userSelection in
@@ -80,8 +80,8 @@ extension SaveGame: FileSyncable {
 ```swift
 extension SaveGame: FileMergable, FileSyncable  {
 
-    func interactiveMerge(with other: SaveGame,
-                          merged: @escaping MergedClosure) {
+    func mergeAsync(with other: SaveGame,
+                    merged: @escaping MergedClosure) {
         // Do any kind of async merging necessary.
         // You just have to call merged() with the 
         // final merged version you want to keep
