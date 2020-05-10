@@ -16,7 +16,7 @@ import Compression
 public extension FileSyncable {
 
     // default implementation just uses the non interactive version
-    func interactiveShouldOverwrite(other: Self, keep: @escaping ShouldOverwriteClosure) {
+    func shouldOverwriteAsync(other: Self, keep: @escaping ShouldOverwriteClosure) {
         if other.shouldOverwrite(other: self) {
             keep(other)
         } else {
@@ -29,8 +29,8 @@ public extension FileSyncable {
         return nil
     }
 
-    // default implementation just uses the non interactive version
-    func interactiveMerge(with other: Self, merged: @escaping MergedClosure) {
+    // default implementation just uses the non async version
+    func mergeAsync(with other: Self, merged: @escaping MergedClosure) {
         merged(self.merge(with: other))
     }
 
@@ -173,7 +173,7 @@ internal extension FileSyncable {
                             }
                         } else {
                             runOnMain {
-                                iCloudDecoded.interactiveMerge(with: localDecoded) { merged in
+                                iCloudDecoded.mergeAsync(with: localDecoded) { merged in
                                     runOnMain {
                                         if let merged = merged {
                                             guard merged != localDecoded else {
@@ -200,7 +200,7 @@ internal extension FileSyncable {
                                             }
                                         } else if iCloudDecoded != localDecoded {
                                             // fall back to overwrite checks
-                                            iCloudDecoded.interactiveShouldOverwrite(other: localDecoded) { winner in
+                                            iCloudDecoded.shouldOverwriteAsync(other: localDecoded) { winner in
                                                 runOnMain {
                                                     if winner == iCloudDecoded {
                                                         // icloud copy is deemed better than local. save to disk and update

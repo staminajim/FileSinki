@@ -26,13 +26,13 @@ public protocol FileSyncable: Codable, Equatable {
     func shouldOverwrite(other: Self) -> Bool
 
     /**
-    Implement this method to allow for interactive checks for overwriting other. Inside, call keep() with the FileSyncable
+    Implement this method to allow for interactive/asynchronous checks for overwriting other. Inside, call keep() with the FileSyncable
      that you wish to keep.
 
     - Parameter other: The other object to check whether to overwrite against.
     - Parameter keep: Pass in the FileSyncable that you wish to keep.
     */
-    func interactiveShouldOverwrite(other: Self, keep:  @escaping ShouldOverwriteClosure)
+    func shouldOverwriteAsync(other: Self, keep:  @escaping ShouldOverwriteClosure)
 
     // MARK: - Merging
 
@@ -44,7 +44,7 @@ public protocol FileSyncable: Codable, Equatable {
     func merge(with other: Self) -> Self?
 
     /**
-    Interactively mege two FileMergables
+    Interactively / asynchronously merge two FileMergables
 
     Inherit from FileMergable and also implement this method to allow for interactive merges with other.
 
@@ -53,7 +53,7 @@ public protocol FileSyncable: Codable, Equatable {
     - Parameter with: The other object to merge with.
     - Parameter merged: Pass in the merged object to use. Passing nil makes FileSinki fall back to no merging using a shouldOverwrite check.
     */
-    func interactiveMerge(with other: Self, merged: @escaping MergedClosure)
+    func mergeAsync(with other: Self, merged: @escaping MergedClosure)
 
     // MARK: - Deleting
 
@@ -81,11 +81,11 @@ public protocol FileSyncable: Codable, Equatable {
 /**
 FileMergable
 
-Inherit from FileMergable and implement either `merge(with other:)` or `interactiveMerge(with:)` to allow for merge operations
+Inherit from FileMergable and implement either `merge(with other:)` or `mergeAsync(with:)` to allow for merge operations
 */
 public protocol FileMergable {
     // inherit from FileMergable and implement
-    //  merge(with other:) or interactiveMerge(with:)
+    //  merge(with other:) or mergeAsync(with:)
     //  to allow for merge operations
 }
 

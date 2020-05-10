@@ -348,7 +348,7 @@ internal class CloudKitManager {
                     let existingDecoded = T.decodeFrom(data: existingCloudData, compression: remoteCompression) {
 
                     runOnMain {
-                        existingDecoded.interactiveMerge(with: originalItem) { merged in
+                        existingDecoded.mergeAsync(with: originalItem) { merged in
                             if let merged = merged {
                                 guard merged != originalItem else {
                                     DebugLog("iCloud version of \(cloudPath) was the same, not overwriting")
@@ -382,7 +382,7 @@ internal class CloudKitManager {
                             } else {
                                 // fall back to overwrite check
                                 runOnMain {
-                                    originalItem.interactiveShouldOverwrite(other: existingDecoded) { winner in
+                                    originalItem.shouldOverwriteAsync(other: existingDecoded) { winner in
                                         if winner == existingDecoded {
                                             DebugLog("iCloud version of \(cloudPath) was better or same, not overwriting")
                                             if originalItem != existingDecoded {

@@ -185,7 +185,7 @@ public extension FileSinki {
     - Parameter data: binary data to save
     - Parameter path: local path of the item, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
-    - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
+    - Parameter mergeAsync: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter finalVersion: If the final version saved to the cloud is different to the one passed in (due to a merge or better available version)
      the final version is passed to this closure
     - Returns: The encoded Data which has saved to disk. nil if did not succeed.
@@ -193,11 +193,11 @@ public extension FileSinki {
     @discardableResult static func saveBinaryFile(_ data: Data,
                                                   toPath path: String,
                                                   root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
-                                                  interactiveMerge: @escaping BinaryFileMergeClosure,
+                                                  mergeAsync: @escaping BinaryFileMergeClosure,
                                                   finalVersion: @escaping (_ data: Data) -> ()) -> Data? {
         let binarySyncable = BinaryFileSyncable(data: data,
                                                 modifiedDate: Date(),
-                                                interactiveMergeClosure: interactiveMerge)
+                                                mergeAsyncClosure: mergeAsync)
         return binarySyncable.saveTo(fileURL: URL(path: path, root: root),
                                      searchPathDirectory: root,
                                      saveToCloud: true,
@@ -210,7 +210,7 @@ public extension FileSinki {
 
     - Parameter path: local path of the data, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
-    - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
+    - Parameter mergeAsync: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter loaded: The Decoded data. nil if no item has been successfully decoded.
 
      Note: The loaded completion can be called multple times as data loads in from disk or the cloud,
@@ -218,13 +218,13 @@ public extension FileSinki {
     */
     static func loadBinaryFile(fromPath path: String,
                                root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
-                               interactiveMerge: BinaryFileMergeClosure? = nil,
+                               mergeAsync: BinaryFileMergeClosure? = nil,
                                loaded: @escaping (_ data: Data?, _ wasRemote: Bool) -> ()) {
         BinaryFileSyncable.loadFrom(fileURL: URL(path: path, root: root),
                                     searchPathDirectory: root,
                                     loadFromCloud: true,
                                     compression: nil,
-                                    binaryMerge: interactiveMerge) { binaryFileSyncable, wasRemote in
+                                    binaryMerge: mergeAsync) { binaryFileSyncable, wasRemote in
                         loaded(binaryFileSyncable?.binaryData, wasRemote)
         }
     }
@@ -239,7 +239,7 @@ public extension FileSinki {
     static func deleteBinaryFile(data: Data,
                                  at path: String,
                                  root: FileManager.SearchPathDirectory = .applicationSupportDirectory) {
-        let binarySyncable = BinaryFileSyncable(data: data, modifiedDate: Date(), interactiveMergeClosure: nil)
+        let binarySyncable = BinaryFileSyncable(data: data, modifiedDate: Date(), mergeAsyncClosure: nil)
         FileSinki.delete(binarySyncable, at: path, root: root)
     }
 
@@ -250,7 +250,7 @@ public extension FileSinki {
     - Parameter data: data to save
     - Parameter path: local path of the item, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
-    - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
+    - Parameter mergeAsync: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter finalVersion: If the final version saved to the cloud is different to the one passed in (due to a merge or better available version)
      the final version is passed to this closure
     - Returns: The encoded Data which has saved to disk. nil if did not succeed.
@@ -258,11 +258,11 @@ public extension FileSinki {
     @discardableResult static func saveBinaryFileCompressed(_ data: Data,
                                          toPath path: String,
                                          root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
-                                         interactiveMerge: BinaryFileMergeClosure?,
+                                         mergeAsync: BinaryFileMergeClosure?,
                                          finalVersion: @escaping (_ data: Data) -> ()) -> Data? {
         let binarySyncable = BinaryFileSyncable(data: data,
                                                 modifiedDate: Date(),
-                                                interactiveMergeClosure: interactiveMerge)
+                                                mergeAsyncClosure: mergeAsync)
         return binarySyncable.saveTo(fileURL: URL(path: path, root: root),
                                      searchPathDirectory: root,
                                      saveToCloud: true,
@@ -275,7 +275,7 @@ public extension FileSinki {
 
     - Parameter path: local path of the item, relative to the root
     - Parameter root: The root search path directory. Defaults to .applicationSupportDirectory + bundle name
-    - Parameter interactiveMerge: call merged() with the final merged Data to be used / saved to disk and the cloud
+    - Parameter mergeAsync: call merged() with the final merged Data to be used / saved to disk and the cloud
     - Parameter loaded: The Decoded item. nil if no item has been successfully decoded.
 
      Note: The loaded completion can be called multple times as data loads in from disk or the cloud,
@@ -283,13 +283,13 @@ public extension FileSinki {
     */
     static func loadBinaryFileCompressed(fromPath path: String,
                                          root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
-                                         interactiveMerge: BinaryFileMergeClosure? = nil,
+                                         mergeAsync: BinaryFileMergeClosure? = nil,
                                          loaded: @escaping (_ data: Data?, _ wasRemote: Bool) -> ()) {
         BinaryFileSyncable.loadFrom(fileURL: URL(path: path, root: root),
                                     searchPathDirectory: root,
                                     loadFromCloud: true,
                                     compression: COMPRESSION_LZFSE,
-                                    binaryMerge: interactiveMerge) { binaryFileSyncable, wasRemote in
+                                    binaryMerge: mergeAsync) { binaryFileSyncable, wasRemote in
                         loaded(binaryFileSyncable?.binaryData, wasRemote)
         }
     }
@@ -304,7 +304,7 @@ public extension FileSinki {
     static func deleteBinaryFileCompressed(_ data: Data,
                                            at path: String,
                                            root: FileManager.SearchPathDirectory = .applicationSupportDirectory) {
-        let binarySyncable = BinaryFileSyncable(data: data, modifiedDate: Date(), interactiveMergeClosure: nil)
+        let binarySyncable = BinaryFileSyncable(data: data, modifiedDate: Date(), mergeAsyncClosure: nil)
         FileSinki.deleteCompressed(binarySyncable, at: path, root: root)
     }
 

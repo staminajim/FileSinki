@@ -17,17 +17,17 @@ internal struct BinaryFileSyncable: FileSyncable, FileMergable {
 
     let binaryData: Data
 
-    var interactiveMergeClosure: BinaryFileMergeClosure?
+    var mergeAsyncClosure: BinaryFileMergeClosure?
 
     enum CodingKeys: String, CodingKey {
         case modifiedDate
         case binaryData
     }
 
-    init(data: Data, modifiedDate: Date, interactiveMergeClosure: BinaryFileMergeClosure?) {
+    init(data: Data, modifiedDate: Date, mergeAsyncClosure: BinaryFileMergeClosure?) {
         self.modifiedDate = modifiedDate
         self.binaryData = data
-        self.interactiveMergeClosure = interactiveMergeClosure
+        self.mergeAsyncClosure = mergeAsyncClosure
     }
 
     func shouldOverwrite(other: Self) -> Bool {
@@ -35,15 +35,15 @@ internal struct BinaryFileSyncable: FileSyncable, FileMergable {
                 self.modifiedDate > other.modifiedDate
     }
 
-    func interactiveMerge(with other: BinaryFileSyncable, merged: @escaping MergedClosure) {
-        if let interactiveMergeClosure = self.interactiveMergeClosure {
-            interactiveMergeClosure(self.binaryData, other.binaryData) { mergedData in
-                let mergedItem = BinaryFileSyncable(data: mergedData, modifiedDate: Date(), interactiveMergeClosure: interactiveMergeClosure)
+    func mergeAsync(with other: BinaryFileSyncable, merged: @escaping MergedClosure) {
+        if let mergeAsyncClosure = self.mergeAsyncClosure {
+            mergeAsyncClosure(self.binaryData, other.binaryData) { mergedData in
+                let mergedItem = BinaryFileSyncable(data: mergedData, modifiedDate: Date(), mergeAsyncClosure: mergeAsyncClosure)
                 merged(mergedItem)
             }
-        } else if let interactiveMergeClosure = other.interactiveMergeClosure {
-            interactiveMergeClosure(other.binaryData, self.binaryData) { mergedData in
-                let mergedItem = BinaryFileSyncable(data: mergedData, modifiedDate: Date(), interactiveMergeClosure: interactiveMergeClosure)
+        } else if let mergeAsyncClosure = other.mergeAsyncClosure {
+            mergeAsyncClosure(other.binaryData, self.binaryData) { mergedData in
+                let mergedItem = BinaryFileSyncable(data: mergedData, modifiedDate: Date(), mergeAsyncClosure: mergeAsyncClosure)
                 merged(mergedItem)
             }
         } else {
@@ -96,7 +96,7 @@ internal extension BinaryFileSyncable {
 
         let binaryFileSyncable = BinaryFileSyncable(data: uncompressedData,
                                                     modifiedDate: modificationDate,
-                                                    interactiveMergeClosure: binaryMerge)
+                                                    mergeAsyncClosure: binaryMerge)
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
