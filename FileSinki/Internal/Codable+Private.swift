@@ -1,9 +1,11 @@
 //
 //  Codable+Compression.swift
-//  LocoLooper
+//  FileSinki
+//
+//  See LICENSE file for licensing information
 //
 //  Created by James Van-As on 6/11/19.
-//  Copyright © 2019 Fat Eel Studios. All rights reserved.
+//  Copyright © 2019 James Van-As. All rights reserved.
 //
 
 import Foundation

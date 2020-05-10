@@ -1,9 +1,11 @@
 //
 //  LocalDatabase.swift
-//  LocoLooper
+//  FileSinki
+//
+//  See LICENSE file for licensing information
 //
 //  Created by James Van-As on 6/05/20.
-//  Copyright © 2020 Fat Eel Studios. All rights reserved.
+//  Copyright © 2020 James Van-As. All rights reserved.
 //
 
 import Foundation

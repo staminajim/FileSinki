@@ -2,6 +2,8 @@
 //  Threads.swift
 //  FileSinki
 //
+//  See LICENSE file for licensing information
+//
 //  Created by James Van-As on 9/05/20.
 //
 

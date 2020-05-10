@@ -1,9 +1,11 @@
 //
 //  URL+ItemKeys.swift
-//  LocoLooper
+//  FileSinki
+//
+//  See LICENSE file for licensing information
 //
 //  Created by James Van-As on 2/05/20.
-//  Copyright © 2020 Fat Eel Studios. All rights reserved.
+//  Copyright © 2020 James Van-As. All rights reserved.
 //
 
 import Foundation
@@ -50,7 +52,7 @@ internal extension URL {
         }
     }
 
-    /// the file path, with pre-icloud portion stripped (eg. /User/Blaa/Application Support/com.blaa.LocoLooper/ is stripped)
+    /// the file path, with pre-icloud portion stripped (eg. /User/Blaa/Application Support/com.blaa.FileSinki/ is stripped)
     func cloudPath(for searchPathDirectory: FileManager.SearchPathDirectory) -> String? {
         let rootFolderName = URL.localRootFolder(for: searchPathDirectory).path + "/"
         guard self.path.hasPrefix(rootFolderName) else {

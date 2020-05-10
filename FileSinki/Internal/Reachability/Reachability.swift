@@ -2,7 +2,12 @@
 //  Reachability.swift
 //  FileSinki
 //
+//  See LICENSE file for licensing information
+//
 //  Created by James Van-As on 10/05/20.
+//  Copyright © 2020 James Van-As. All rights reserved.
+//
+//  See LICENSE 
 //
 
 import Foundation
