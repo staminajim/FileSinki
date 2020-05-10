@@ -8,7 +8,7 @@
 
 import Foundation
 
-class FileSinki {
+public class FileSinki {
     
     internal static var cloudKitManager: CloudKitManager!
     internal static let localDB = LocalDatabase()
@@ -18,19 +18,19 @@ class FileSinki {
 
     // MARK: - Changed Closures
 
-    typealias GenericChanged = ((_ changedItems: [ChangeItemGeneric]) -> Void)
+    public typealias GenericChanged = ((_ changedItems: [ChangeItemGeneric]) -> Void)
 
-    struct ChangeItemGeneric {
+    public struct ChangeItemGeneric {
         let localURL: URL
         let path: String
     }
 
-    struct ChangeItem<T: FileSyncable> {
+    public struct ChangeItem<T: FileSyncable> {
         let item: T
         let localURL: URL
         let path: String
         
-        typealias Changed = ((_ changedItem: FileSinki.ChangeItem<T>) -> Void)
+        public typealias Changed = ((_ changedItem: FileSinki.ChangeItem<T>) -> Void)
     }
 
 }

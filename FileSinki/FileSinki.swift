@@ -11,7 +11,7 @@ import Compression
 
 // MARK: - FileSinki Setup
 
-extension FileSinki {
+public extension FileSinki {
 
     /**
        Initializes FileSinki. Call in AppDelegate didFinishLaunching with your CloudKit Container ID
@@ -45,7 +45,7 @@ extension FileSinki {
 
 // MARK: - Loading and Saving FileSyncables
 
-extension FileSinki {
+public extension FileSinki {
 
     // MARK: Uncompressed
     /**
@@ -174,7 +174,7 @@ extension FileSinki {
 
 // MARK: - Loading and Saving Binary Files
 
-extension FileSinki {
+public extension FileSinki {
 
     // MARK: Uncompressed
     /**
@@ -311,7 +311,7 @@ extension FileSinki {
 
 // MARK: - Observing Changes
 
-extension FileSinki {
+public extension FileSinki {
 
     /**
        Observes remote changes to the given path. If the path is a folder, (ending in trailing "/") any files in that folder
@@ -338,7 +338,7 @@ extension FileSinki {
 
 // MARK: - Root Folder
 
-extension FileSinki {
+public extension FileSinki {
 
     /// The default local root folder that FileSinki will use. Application Support/com.blaa.app/ on iOS and OSX, and Cache//com.blaa.app/ on tvOS
     static var defaultRootFolder: URL {

@@ -11,7 +11,7 @@ import Compression
 
 // MARK: - FileSyncable Protocol
 
-protocol FileSyncable: Codable, Equatable {
+public protocol FileSyncable: Codable, Equatable {
 
     // MARK: - Overwriting
 
@@ -89,11 +89,11 @@ protocol FileMergable {
 
 // MARK: - Closures
 
-extension FileSyncable {
+public extension FileSyncable {
     typealias ShouldOverwriteClosure = ((_ keep: Self) -> ())
     typealias MergedClosure = ((_ mergedItem: Self?) -> ())
     typealias ShouldDeleteClosure = ((_ delete: Bool) -> ())
 }
-typealias BinaryMergedClosure = ((_ mergedData: Data) -> ())
-typealias BinaryFileMergeClosure = ((_ left: Data, _ right: Data, _ merged: @escaping BinaryMergedClosure) -> ())
+public typealias BinaryMergedClosure = ((_ mergedData: Data) -> ())
+public typealias BinaryFileMergeClosure = ((_ left: Data, _ right: Data, _ merged: @escaping BinaryMergedClosure) -> ())
 
