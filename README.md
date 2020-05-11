@@ -2,9 +2,7 @@
 
 Easy file syncing between iOS, MacOS and tvOS, using CloudKit.
 
-## Setup
-
-## Usage
+# Usage
 
 ## FileSyncable
 
@@ -174,7 +172,7 @@ FileSinki.addObserver(self,
 
 ## URLs and Folders
 
-By default FileSinki puts files in ` .applicationSupportDirectory + bundle name`. You can specify a different location using the optional `root` parameter.
+By default FileSinki puts files in `.applicationSupportDirectory + bundle name`. You can specify a different location using the optional `root` parameter.
 
 ```swift
 // load a SaveGame from a file with path: "SaveGames/player1.save" inside the Documents directory
@@ -191,6 +189,8 @@ FileSinki.load(SaveGame.self,
                fromPath: saveGameURL.path) { saveGame, wasRemote in
 }
 ```
+
+Note that tvOS only supports writing to the `.caches` folder. FileSinki automatically uses this folder instead of `.applicationSupportDirectory` so you don't have to worry about it.
 
 ## Compression
 
@@ -219,3 +219,5 @@ FileSinki.deleteCompressed(saveGame, at: "SaveGames/player1.save")
 ```
 
 The compression used is Apple's LZFSE
+
+# Setup
