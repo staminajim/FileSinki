@@ -268,11 +268,33 @@ FileSinki works with Objective-C, but functionality is limited to saving and loa
 
 # Installation and Setup
 
+## CloudKit
+
+1. Enable `CloudKit` in your app's `Capabilities`. Note your application's CloudKit container identifier for use later on.
+
+2. In the https://icloud.developer.apple.com go to your application's Development `Schema`, and add a new `Record Type` called `FileSinki` with the following `Custom Fields`:
+
+* `path` (Type String)
+* `type` (Type String)
+* `asset` (Type Asset)
+* `data` (Type Bytes)
+* `deleted` (Type Int(64))
+
+3. In the FileSinki Record Schema, click `Edit Indexes`, add the following Indexes:
+
+* `recordName` (`QUERYABLE`)
+* `type` (`QUERYABLE`)
+* `path` (`SEARCHABLE`)
+
+And save changes.
+
+Note: Once you have verfied that FileSinki is working correctly in the development environment, don't forget to deploy the schema to `Production`:
+
 ## AppDelegate
 
 Add the following code to your AppDelegate (or equivalent MacOS delegate functions)
 
-1. Add `FileSinki.setup()` and `registerForRemoteNotifications()` to `didFinishLaunchingWithOptions` with your CloudKit identifier
+1. Add `FileSinki.setup()` and `registerForRemoteNotifications()` to `didFinishLaunchingWithOptions` with your CloudKit  container identifier
 ```swift
 func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     FileSinki.setup(cloudKitContainer: "iCloud.com.MyCompanyName.MyCoolApp")
