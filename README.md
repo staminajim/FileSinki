@@ -265,3 +265,35 @@ FileSinki works with Objective-C, but functionality is limited to saving and loa
     }
 }];
 ```
+
+# Installation and Setup
+
+## AppDelegate
+
+Add the following code to your AppDelegate (or equivalent MacOS delegate functions)
+
+1. Add `FileSinki.setup()` and `registerForRemoteNotifications()` to `didFinishLaunchingWithOptions` with your CloudKit identifier
+```swift
+func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    FileSinki.setup(cloudKitContainer: "iCloud.com.MyCompanyName.MyCoolApp")
+    application.registerForRemoteNotifications()    // required for live change observing
+}
+```
+2. Add `FileSinki.didBecomeActive()` to `applicationDidBecomeActive`
+```swift
+func applicationDidBecomeActive(_ application: UIApplication) {      
+    FileSinki.didBecomeActive()
+}
+```
+
+3. Add `FileSinki.receivedNotification(userInfo)` to `didReceiveRemoteNotification`
+```swift
+func application(_ application: UIApplication,
+                 didReceiveRemoteNotification userInfo: [AnyHashable : Any],
+                 fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+    FileSinki.receivedNotification(userInfo)
+    completionHandler(.newData)
+}
+```
+
+Note: In my experience `application.registerForRemoteNotifications()` will do nothing and `didReceiveRemoteNotification` nor it's `didFail` equivalent will be called for at least 24 hours after the first call. At some point it will just start working once Apple Push Notification Service has finished doing it's thing.
