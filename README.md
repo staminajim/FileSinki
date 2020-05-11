@@ -191,3 +191,31 @@ FileSinki.load(SaveGame.self,
                fromPath: saveGameURL.path) { saveGame, wasRemote in
 }
 ```
+
+## Compression
+
+Internally FileSinki always stores compressed versions of your data in the cloud. It can also be advantageous to store compressed versions locally. Compression and decompression is often much faster than disk access, and Codable files generally compress extremely well.
+
+There are compressed versions of all of the above FileSinki operations. For example:
+
+```swift
+// load a compressed SaveGame from a file with path: "SaveGames/player1.save"
+FileSinki.loadCompressed(SaveGame.self,
+                         fromPath: "SaveGames/player1.save") { saveGame, wasRemote in
+}
+```
+```swift
+// save a compressed saveGame to a file with path: "SaveGames/player1.save"
+FileSinki.saveCompressed(saveGame,
+                         toPath: "SaveGames/player1.save") { finalVersion in
+    // closure *may* be called with finalVersion 
+    // if the saveGame changed as a result of a merge
+    // or a better available version
+}
+```
+```swift
+// delete the compressed saveGame
+FileSinki.deleteCompressed(saveGame, at: "SaveGames/player1.save")
+```
+
+The compression used is Apple's LZFSE
