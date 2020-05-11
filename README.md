@@ -171,3 +171,23 @@ FileSinki.addObserver(self,
     FileSinki.loadBinaryFile(...
 }
 ```
+
+## URLs and Folders
+
+By default FileSinki puts files in ` .applicationSupportDirectory + bundle name`. You can specify a different location using the optional `root` parameter.
+
+```swift
+// load a SaveGame from a file with path: "SaveGames/player1.save" inside the Documents directory
+FileSinki.load(SaveGame.self,
+               fromPath: "SaveGames/player1.save",
+               root: .documentDirectory) { saveGame, wasRemote in
+}
+```
+You can also pass in a full path from a local url:
+
+```swift
+let saveGameURL: URL = ...  // some local file URL
+FileSinki.load(SaveGame.self,
+               fromPath: saveGameURL.path) { saveGame, wasRemote in
+}
+```
