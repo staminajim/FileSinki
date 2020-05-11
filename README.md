@@ -215,7 +215,7 @@ FileSinki.load(SaveGame.self,
 }
 ```
 
-Note that tvOS only supports writing to the `.caches` folder. FileSinki automatically uses this folder instead of `.applicationSupportDirectory` so you don't have to worry about it.
+*Note that tvOS only supports writing to the `.caches` folder. FileSinki automatically uses this folder instead of `.applicationSupportDirectory` so you don't have to worry about it.*
 
 ## Compression
 
@@ -330,7 +330,7 @@ The final result should look like:
 
 <img width="500" alt="CloudKitRecordType" src="https://user-images.githubusercontent.com/1085877/81517502-437b9380-938f-11ea-99c7-f0b6233c977b.png">
 
-Note: Once you have verfied that FileSinki is working correctly in the development environment, don't forget to deploy the schema to `Production`:
+*Note: Once you have verfied that FileSinki is working correctly in the development environment, don't forget to deploy the schema to `Production`:*
 
 <img width="500" alt="Deploy to Production" src="https://user-images.githubusercontent.com/1085877/81517504-46768400-938f-11ea-8ffc-65314133c60b.png">
 
@@ -362,7 +362,7 @@ func application(_ application: UIApplication,
 }
 ```
 
-Note: In my experience `application.registerForRemoteNotifications()` will do nothing and `didReceiveRemoteNotification` nor it's `didFail` equivalent will be called for at least 24 hours after the first call. At some point it will just start working once Apple Push Notification Service has finished doing it's thing.
+*Note: In my experience `application.registerForRemoteNotifications()` will do nothing and `didReceiveRemoteNotification` nor it's `didFail` equivalent will be called for at least 24 hours after the first call. At some point it will just start working once Apple Push Notification Service has finished doing it's thing.*
 
 # Author
 
