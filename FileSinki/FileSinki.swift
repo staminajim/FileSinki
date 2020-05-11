@@ -218,7 +218,7 @@ public extension FileSinki {
     */
     static func loadBinaryFile(fromPath path: String,
                                root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
-                               mergeAsync: BinaryFileMergeClosure? = nil,
+                               mergeAsync: @escaping BinaryFileMergeClosure,
                                loaded: @escaping (_ data: Data?, _ wasRemote: Bool) -> ()) {
         BinaryFileSyncable.loadFrom(fileURL: URL(path: path, root: root),
                                     searchPathDirectory: root,
