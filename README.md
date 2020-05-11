@@ -223,7 +223,7 @@ The compression used is Apple's LZFSE
 
 # Objective-C
 
-FileSinki works with Objective-C, but functionality is limited to save and loading `NSData`.
+FileSinki works with Objective-C, but functionality is limited to saving and loading `NSData`.
 
 ```objective-c
 [FileSinki loadBinaryFileFromPath:@"test.pdf"
