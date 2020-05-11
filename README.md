@@ -2,6 +2,24 @@
 
 Easy file syncing between iOS, MacOS and tvOS, using CloudKit.
 
+- [Basic Usage](#basic-usage)
+  * [FileSyncable](#filesyncable)
+    + [Saving, Loading and Deleting](#saving-loading-and-deleting)
+- [Advanced Usage](#advanced-usage)
+    + [Mergables](#mergables)
+    + [Interactive / Asynchronous Selection and Merging](#interactive--asynchronous-selection-and-merging)
+    + [Observing Changes](#observing-changes)
+  * [Binary Files](#binary-files)
+    + [Saving, Loading and Deleting](#saving-loading-and-deleting-1)
+    + [Observing Changes](#observing-changes-1)
+  * [URLs and Folders](#urls-and-folders)
+  * [Compression](#compression)
+- [Objective-C](#objective-c)
+- [Installation and Setup](#installation-and-setup)
+  * [Installation](#installation)
+  * [CloudKit Setup](#cloudkit-setup)
+  * [AppDelegate](#appdelegate)
+
 # Basic Usage
 
 ```swift
