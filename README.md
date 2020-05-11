@@ -2,6 +2,12 @@
 
 *Easy file syncing between iOS, MacOS and tvOS, using CloudKit.*
 
+![Swift Version 5](https://img.shields.io/badge/Swift-v5-green.svg)
+[![CocoaPods Badge](https://img.shields.io/badge/CocoaPods-Yes-green.svg)](https://cocoapods.org/pods/FileSinki)
+![SwiftPM Badge](https://img.shields.io/badge/SwiftPM-Yes-green.svg)
+![Supported Platforms Badge](https://img.shields.io/badge/Supported%20Platforms-iOS%20%7C%20MacOS%20%7C%20tvOS-yellowgreen.svg)
+[![license](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/staminajim/FileSinki/blob/master/LICENSE)
+
 - [Basic Usage](#basic-usage)
   * [FileSyncable](#filesyncable)
     + [Saving, Loading and Deleting](#saving-loading-and-deleting)
