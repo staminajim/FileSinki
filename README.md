@@ -272,6 +272,8 @@ FileSinki works with Objective-C, but functionality is limited to saving and loa
 
 1. Enable `CloudKit` in your app's `Capabilities`. Note your application's CloudKit container identifier for use later on.
 
+<img width="500" alt="App Capabilities" src="https://user-images.githubusercontent.com/1085877/81517496-3eb6df80-938f-11ea-97f7-1b9136a4b725.png">
+
 2. In the https://icloud.developer.apple.com go to your application's Development `Schema`, and add a new `Record Type` called `FileSinki` with the following `Custom Fields`:
 
 * `path` (Type String)
@@ -288,7 +290,13 @@ FileSinki works with Objective-C, but functionality is limited to saving and loa
 
 And save changes.
 
+The final result should look like:
+
+<img width="500" alt="CloudKitRecordType" src="https://user-images.githubusercontent.com/1085877/81517502-437b9380-938f-11ea-99c7-f0b6233c977b.png">
+
 Note: Once you have verfied that FileSinki is working correctly in the development environment, don't forget to deploy the schema to `Production`:
+
+<img width="500" alt="Deploy to Production" src="https://user-images.githubusercontent.com/1085877/81517504-46768400-938f-11ea-8ffc-65314133c60b.png">
 
 ## AppDelegate
 
