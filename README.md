@@ -6,9 +6,11 @@ Easy file syncing between iOS, MacOS and tvOS, using CloudKit.
 
 ## Usage
 
-### FileSyncable
+## FileSyncable
 
-Adopt the FileSyncable protocol to get automatic coding and decoding of your data.
+Adopt the FileSyncable protocol to make your data work with FileSinki.
+
+The most basic function is `shouldOverwrite`, which decides what to do if a local copy and a remote (cloud) copy of the data conflicts.
 
 ```swift
 struct SaveGame: FileSyncable {
@@ -95,10 +97,35 @@ extension SaveGame: FileMergable, FileSyncable  {
 ```
 Inside you can do any work asynchronously or in different threads, you just have to call `keep` or `merged` once the work is complete with the final item to use.
 
-### Binary Files
+### Observing Changes
+
+Similar to adding observers to the `NotificationCenter`, you can watch for changes to items that happen on other devices:
+
+```swift
+FileSinki.addObserver(self,
+                      for: SaveGame.self,
+                      path: "SaveGames/player1.save") { changed in
+    // any time a SaveGame in the file player1.save changes remotely, this closure will be called.
+    let changedSaveGame = changed.item
+    print("Observed FileSinki change in \(changedSaveGame) with local URL \(changed.localURL) and path: \(changed.path)")
+}
+```
+If the path provided ends in a trailing slash `/`, then any files in that folder will be recursively checked for changes:
+```swift
+FileSinki.addObserver(self,
+                      for: SaveGame.self,
+                      path: "SaveGames/") { changed in
+    // any time a SaveGame anywhere in SaveGames/ changes remotely, this closure will be called.
+    let changedSaveGame = changed.item
+    print("Observed change in \(changedSaveGame) with local URL \(changed.localURL) and path: \(changed.path)")
+}
+```
+
+## Binary Files
 
 If you are dealing with raw Data files or non Codable objects/structs you can use FileSinki at the raw data level.
 
+### Saving, Loading and Deleting
 ```swift
 // load a PDF from a file with path: "test.pdf"
 FileSinki.loadBinaryFile(fromPath: "test.pdf",
@@ -132,4 +159,15 @@ FileSinki.saveBinaryFile(pdf.data,
 ```
 ```swift
 FileSinki.deleteBinaryFile(pdf.data, at: "test.pdf")
+```
+### Observing Changes
+Observing remote changes with binary files is more limited than with FileSyncables. You will only be notified of which paths / local urls which have changed. It is your responsibility to then load the binary files yourself.
+```swift
+FileSinki.addObserver(self,
+                      path: "test.pdf") { changed in
+    // any time test.pdf changes remotely, this closure will be called.    
+    print("Observed a binary file change with path: \(changed.path)")
+    // You'll probably want to actually do something now that you know a binary file has changed remotely.
+    FileSinki.loadBinaryFile(...
+}
 ```
