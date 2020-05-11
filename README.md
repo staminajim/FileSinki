@@ -30,7 +30,8 @@ FileSinki.load(SaveGame.self,
     // closure *may* be called multiple times, 
     // if the cloud has a better version of saveGame
 }
-
+```
+```swift
 // save a saveGame to a file with path: "SaveGames/player1.save"
 FileSinki.save(saveGame,
                toPath: "SaveGames/player1.save") { finalVersion in
@@ -38,7 +39,8 @@ FileSinki.save(saveGame,
     // if the saveGame changed as a result of a merge
     // or a better available version
 }
-
+```
+```swift
 // delete the saveGame
 FileSinki.delete(saveGame, at: "SaveGames/player1.save")
 ```
@@ -92,3 +94,42 @@ extension SaveGame: FileMergable, FileSyncable  {
 }
 ```
 Inside you can do any work asynchronously or in different threads, you just have to call `keep` or `merged` once the work is complete with the final item to use.
+
+### Binary Files
+
+If you are dealing with raw Data files or non Codable objects/structs you can use FileSinki at the raw data level.
+
+```swift
+// load a PDF from a file with path: "test.pdf"
+FileSinki.loadBinaryFile(fromPath: "test.pdf",
+                         mergeAsync: { left, right, merged in
+    let leftPDF = PDF(data: left)
+    let rightPDF = PDF(data: right)
+    SomePDFMerger.merge(leftPDF, rightPDF) { finalMergedPDF in {
+        merged(finalMergedPDF.data)
+    }
+}) { data, wasRemote in
+    // closure *may* be called multiple times, 
+    // if the cloud has a better version of your data
+    let loadedPDF = PDF(data: data)    // the final data object which has been merged across devices
+}
+```
+```swift
+FileSinki.saveBinaryFile(pdf.data,
+                         toPath: "test.pdf",
+                         mergeAsync: { left, right, merged in
+    let leftPDF = PDF(data: left)
+    let rightPDF = PDF(data: right)
+    SomePDFMerger.merge(leftPDF, rightPDF) { finalMergedPDF in {
+        merged(finalMergedPDF.data)
+    }
+}) { finalData in
+    // closure *may* be called with finalData 
+    // if the data changed as a result of a merge
+    // or a better available version
+    let loadedPDF = PDF(data: finalData)    // the final data object which has been merged across devices
+}
+```
+```swift
+FileSinki.deleteBinaryFile(pdf.data, at: "test.pdf")
+```
