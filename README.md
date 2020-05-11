@@ -4,6 +4,10 @@ Easy file syncing between iOS, MacOS and tvOS, using CloudKit.
 
 # Basic Usage
 
+```swift
+import FileSinki
+```
+
 ## FileSyncable
 
 Adopt the FileSyncable protocol to make your data work with FileSinki.
@@ -226,6 +230,9 @@ The compression used is Apple's LZFSE
 FileSinki works with Objective-C, but functionality is limited to saving and loading `NSData`.
 
 ```objective-c
+@import FileSinki;
+```
+```objective-c
 [FileSinki loadBinaryFileFromPath:@"test.pdf"
                              root:NSApplicationSupportDirectory
                        mergeAsync:^(NSData *left, NSData *right, void (^merged)(NSData *data)) {
@@ -268,7 +275,14 @@ FileSinki works with Objective-C, but functionality is limited to saving and loa
 
 # Installation and Setup
 
-## CloudKit
+## Installation
+
+FileSinki can be installed via the **Swift Package Manager** or **Cocoapods**:
+```ruby
+pod 'FileSinki'
+```
+
+## CloudKit Setup
 
 1. Enable `CloudKit` in your app's `Capabilities`. Note your application's CloudKit container identifier for use later on.
 
