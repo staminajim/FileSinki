@@ -1,6 +1,14 @@
 MIT License
 
-Copyright (c) 2020 James V
+----------------------------------------------------------------------------
+FileSinki
+Copyright (c) 2020 James Van-As
+----------------------------------------------------------------------------
+DispatchQueue+Dedupe.swift
+Copyright (c) 2019, SeatGeek, Inc
+All rights reserved.
+Created by James Van-As on 21/09/18.
+----------------------------------------------------------------------------
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
