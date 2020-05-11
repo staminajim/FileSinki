@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "FileSinki"
-  s.version      = "1.0.0"
+  s.version      = "1.0.1"
   s.summary      = "File Syncing between iOS, MacOS and tvOS using CloudKit"
 
   # This description is used to generate tags and improve search results.
