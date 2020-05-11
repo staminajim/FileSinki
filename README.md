@@ -225,6 +225,8 @@ FileSinki.deleteCompressed(saveGame, at: "SaveGames/player1.save")
 
 The compression used is Apple's LZFSE
 
+There are also a few handy compression functions in `Data+Compression.swift` and `Codable+Compression.swift` which don't involve file syncing
+
 # Objective-C
 
 FileSinki works with Objective-C, but functionality is limited to saving and loading `NSData`.
