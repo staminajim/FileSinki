@@ -2,7 +2,7 @@
 
 Easy file syncing between iOS, MacOS and tvOS, using CloudKit.
 
-# Usage
+# Basic Usage
 
 ## FileSyncable
 
@@ -44,6 +44,7 @@ FileSinki.save(saveGame,
 // delete the saveGame
 FileSinki.delete(saveGame, at: "SaveGames/player1.save")
 ```
+# Advanced Usage
 
 ### Mergables
 
