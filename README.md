@@ -70,7 +70,7 @@ FileSinki.delete(saveGame, at: "SaveGames/player1.save")
 
 ### Mergables
 
-Adopt the FileMergable and implement `merge(with:)` to merge FileSyncables between devices.
+Adopt the FileMergable protocol and implement `merge(with:)` to merge FileSyncables between devices.
 Return the new merged object / struct which will be used.
 
 ```swift
