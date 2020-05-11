@@ -221,4 +221,47 @@ FileSinki.deleteCompressed(saveGame, at: "SaveGames/player1.save")
 
 The compression used is Apple's LZFSE
 
-# Setup
+# Objective-C
+
+FileSinki works with Objective-C, but functionality is limited to save and loading `NSData`.
+
+```objective-c
+[FileSinki loadBinaryFileFromPath:@"test.pdf"
+                             root:NSApplicationSupportDirectory
+                       mergeAsync:^(NSData *left, NSData *right, void (^merged)(NSData *data)) {
+    // decode left and right data, merge and then pass on the final mergedData to merged()           
+    NSData *mergedData = [mergedPDF data];
+    merged(mergedData);
+ } loaded:^(NSData *finalData, BOOL wasRemote) {
+     if (!finalData) {
+         return;
+     }         
+ }];
+```
+```objective-c
+[FileSinki saveBinaryFile:pdfData
+                   toPath:@"test.pdf"
+                     root:NSApplicationSupportDirectory
+               mergeAsync:^(NSData *left, NSData *right, void (^ merge)(NSData *mergedData)) {
+    // decode left and right data, merge and then pass on the final mergedData to merged()           
+    NSData *mergedData = [mergedPDF data];
+    merged(mergedData);
+} finalVersion:^(NSData *finalVersion) {
+    // do stuff with the final merged data  
+}];
+```
+```objective-c
+[FileSinki deleteBinaryFile:pdfData
+                   atPath:@"test.pdf"
+                     root:NSApplicationSupportDirectory];
+```
+```objective-c
+[FileSinki addObserver:self 
+                  path:@"SaveGames/"
+                  root:NSApplicationSupportDirectory
+              itemsChanged:^(NSArray<ChangeItem *> * changedItems) {
+    for (ChangeItem *item in changedItems) {
+        printf("File changed at %s\n", item.localURL.absoluteString.UTF8String);
+    }
+}];
+```
