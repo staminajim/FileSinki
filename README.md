@@ -255,10 +255,16 @@ There are also a few handy compression functions in `Data+Compression.swift` and
 
 # Objective-C
 
-FileSinki works with Objective-C, but functionality is limited to saving and loading `NSData`.
+FileSinki works with Objective-C, but functionality is limited to saving and loading `NSData`. Here are some Objective-C equivalents of the above features:
 
 ```objective-c
 @import FileSinki;
+```
+```
+[FileSinki setupWithCloudKitContainer:@"Blaa"];
+```
+```
+[FileSinki receivedNotification:notificationInfo];
 ```
 ```objective-c
 [FileSinki loadBinaryFileFromPath:@"test.pdf"
