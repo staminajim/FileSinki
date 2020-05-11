@@ -1,6 +1,6 @@
 # FileSinki
 
-Easy file syncing between iOS, MacOS and tvOS, using CloudKit.
+*Easy file syncing between iOS, MacOS and tvOS, using CloudKit.*
 
 - [Basic Usage](#basic-usage)
   * [FileSyncable](#filesyncable)
