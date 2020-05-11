@@ -19,6 +19,8 @@ Easy file syncing between iOS, MacOS and tvOS, using CloudKit.
   * [Installation](#installation)
   * [CloudKit Setup](#cloudkit-setup)
   * [AppDelegate](#appdelegate)
+- [Author](#author)
+- [License](#license)
 
 # Basic Usage
 
@@ -361,3 +363,11 @@ func application(_ application: UIApplication,
 ```
 
 Note: In my experience `application.registerForRemoteNotifications()` will do nothing and `didReceiveRemoteNotification` nor it's `didFail` equivalent will be called for at least 24 hours after the first call. At some point it will just start working once Apple Push Notification Service has finished doing it's thing.
+
+# Author
+
+- James Vanas ([@jamesvanas](https://twitter.com/jamesvanas))
+
+# License
+
+FileSinki is released under the MIT license. See LICENSE for details.
