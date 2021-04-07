@@ -350,7 +350,7 @@ internal class CloudKitManager {
                     runOnMain {
                         existingDecoded.mergeAsync(with: originalItem) { merged in
                             if let merged = merged {
-                                guard merged != originalItem else {
+                                guard merged != existingDecoded else {
                                     DebugLog("iCloud version of \(cloudPath) was the same, not overwriting")
                                     self.localDB.addLocalKnownFileFor(recordID: recordID,
                                                                       type: T.self,
