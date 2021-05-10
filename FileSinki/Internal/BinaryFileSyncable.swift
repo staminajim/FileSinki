@@ -98,8 +98,7 @@ internal extension BinaryFileSyncable {
                                                     modifiedDate: modificationDate,
                                                     mergeAsyncClosure: binaryMerge)
 
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
+        let encoder = JSONEncoder()        
 
         guard let jsonData = try? encoder.encode(binaryFileSyncable) else {
             DebugAssert(false, "Failed to encode save state json for \(fileURL)")

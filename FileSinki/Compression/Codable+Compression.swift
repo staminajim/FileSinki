@@ -40,7 +40,6 @@ public extension Encodable {
     */
     func compress(with compression: compression_algorithm?) -> Data? {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
 
         guard let jsonData = try? encoder.encode(self) else {
             DebugAssert(false, "Failed to encode save state json \(String(describing: self))")

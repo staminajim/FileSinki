@@ -282,7 +282,6 @@ internal extension FileSyncable {
                          compression: compression_algorithm?,
                          finalVersion: @escaping (_ item: Self) -> ()) {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
 
         guard let jsonData = try? encoder.encode(self) else {
             DebugAssert(false, "Failed to encode save state json \(String(describing: self))")
@@ -322,8 +321,7 @@ internal extension FileSyncable {
     func deleteDataInCloud(fileURL: URL,
                            searchPathDirectory: FileManager.SearchPathDirectory,
                            compression: compression_algorithm?) {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
+        let encoder = JSONEncoder()        
 
         guard let jsonData = try? encoder.encode(self) else {
             DebugAssert(false, "Failed to encode save state json \(String(describing: self))")

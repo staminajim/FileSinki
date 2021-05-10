@@ -61,8 +61,7 @@ internal extension Encodable {
 
     @discardableResult func internalSaveLocalTo(fileURL: URL,
                                                 compression: compression_algorithm? = COMPRESSION_LZFSE) -> Data? {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
+        let encoder = JSONEncoder()        
 
         guard let jsonData = try? encoder.encode(self) else {
             DebugAssert(false, "Failed to encode save state json \(String(describing: self))")
