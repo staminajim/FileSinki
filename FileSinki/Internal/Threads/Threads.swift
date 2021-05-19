@@ -18,7 +18,20 @@ func runOnMain(block: @escaping () -> ()) {
 }
 
 func runAsync(block: @escaping () -> ()) {
-    DispatchQueue.global(qos: .default).async {
+    let operation = BlockOperation {
         block()
     }
+    operation.qualityOfService = .userInitiated
+    Scheduler.asyncQueue.addOperation(operation)
+}
+
+fileprivate final class Scheduler {
+
+    static let asyncQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.name = "filesinki_async"
+        queue.maxConcurrentOperationCount = max(ProcessInfo.processInfo.activeProcessorCount, 1)
+        return queue
+    }()
+
 }
