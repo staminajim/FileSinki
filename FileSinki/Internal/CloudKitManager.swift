@@ -347,36 +347,38 @@ internal class CloudKitManager {
                 } else if let existingCloudData = existingRecord.extractData(),
                     let existingDecoded = T.decodeFrom(data: existingCloudData, compression: remoteCompression) {
 
-                    runOnMain {
+                    runAsync {
                         existingDecoded.mergeAsync(with: originalItem) { merged in
                             if let merged = merged {
-                                guard merged != existingDecoded else {
-                                    DebugLog("iCloud version of \(cloudPath) was the same, not overwriting")
-                                    self.localDB.addLocalKnownFileFor(recordID: recordID,
-                                                                      type: T.self,
-                                                                      version: existingRecord.recordChangeTag ?? "",
-                                                                      deleted: false,
-                                                                      compressed: compression != nil)
-                                    return  // icloud version is same after merge, don't overwrite
-                                }
-                                DebugLog("Merging \(cloudPath) with iCloud version")
+                                runOnMain {
+                                    guard merged != existingDecoded else {
+                                        DebugLog("iCloud version of \(cloudPath) was the same, not overwriting")
+                                        self.localDB.addLocalKnownFileFor(recordID: recordID,
+                                                                          type: T.self,
+                                                                          version: existingRecord.recordChangeTag ?? "",
+                                                                          deleted: false,
+                                                                          compressed: compression != nil)
+                                        return  // icloud version is same after merge, don't overwrite
+                                    }
+                                    DebugLog("Merging \(cloudPath) with iCloud version")
 
-                                runAsync {
-                                    // need to reserialize and compress
-                                    if let compressedData = merged.saveLocalTo(fileURL: cloudPath.localURLFromCloudPath(for: searchPathDirectory),
-                                                                               compression: compression) {
-                                        if remoteCompression == compression {
-                                            dataToWrite = compressedData
-                                        } else if let remoteCompressed = merged.compress(with: remoteCompression) {
-                                            dataToWrite = remoteCompressed
+                                    runAsync {
+                                        // need to reserialize and compress
+                                        if let compressedData = merged.saveLocalTo(fileURL: cloudPath.localURLFromCloudPath(for: searchPathDirectory),
+                                                                                   compression: compression) {
+                                            if remoteCompression == compression {
+                                                dataToWrite = compressedData
+                                            } else if let remoteCompressed = merged.compress(with: remoteCompression) {
+                                                dataToWrite = remoteCompressed
+                                            }
+                                            runOnMain {
+                                                existingRecord.setData(cloudPath: cloudPath, data: dataToWrite, deleted: delete, type: typeString)
+                                                sendRecordToCloud(existingRecord)
+                                                finalVersion?(merged)
+                                            }
+                                        } else {
+                                            DebugAssert(false, "Failed to save merged file \(cloudPath) to local")
                                         }
-                                        runOnMain {
-                                            existingRecord.setData(cloudPath: cloudPath, data: dataToWrite, deleted: delete, type: typeString)
-                                            sendRecordToCloud(existingRecord)
-                                            finalVersion?(merged)
-                                        }
-                                    } else {
-                                        DebugAssert(false, "Failed to save merged file \(cloudPath) to local")
                                     }
                                 }
                             } else {

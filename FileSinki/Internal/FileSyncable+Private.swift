@@ -172,7 +172,7 @@ internal extension FileSyncable {
                                 }
                             }
                         } else {
-                            runOnMain {
+                            runAsync {
                                 iCloudDecoded.mergeAsync(with: localDecoded) { merged in
                                     runOnMain {
                                         if let merged = merged {
