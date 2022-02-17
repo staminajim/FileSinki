@@ -383,13 +383,15 @@ internal final class CloudKitManager {
                              path: String,
                              searchPathDirectory: FileManager.SearchPathDirectory,
                              fetched: @escaping FetchCompletion) {
-        let queueItem = FetchRecordQueueItem(recordID: recordID,
-                                             path: path,
-                                             searchPathDirectory: searchPathDirectory,
-                                             fetched: fetched)
-        fetchRecordQueue.append(queueItem)
+        runOnMain {
+            let queueItem = FetchRecordQueueItem(recordID: recordID,
+                                                 path: path,
+                                                 searchPathDirectory: searchPathDirectory,
+                                                 fetched: fetched)
+            self.fetchRecordQueue.append(queueItem)
 
-        debouncedRecordFetch()
+            self.debouncedRecordFetch()
+        }
     }
 
     // MARK: Saving and Deleting
@@ -414,12 +416,10 @@ internal final class CloudKitManager {
 
         let typeString = String(describing: type(of: originalItem))
 
-        let predicate = NSPredicate(format: "\(RecordKey.recordID.rawValue) = %@",
-                        CKRecord.ID(recordName: cloudPath.toRecordID(root: searchPathDirectory),
-                                    zoneID: CloudKitManager.privateZoneId))
-
-        fetchRecords(predicate: predicate, path: cloudPath) { fileSinkiRecords in
-
+        fetchRecord(recordID: CKRecord.ID(recordName: cloudPath.toRecordID(root: searchPathDirectory),
+                                          zoneID: CloudKitManager.privateZoneId),
+                    path: cloudPath,
+                    searchPathDirectory: searchPathDirectory) { fileSinkiRecords in
             let sendRecordToCloud = { record in
                 self.saveRecord(record,
                                 cloudPath: cloudPath,
