@@ -322,10 +322,12 @@ internal final class CloudKitManager {
     }
 
     private func debouncedRecordFetch() {
-        if !fetchRecordQueue.isEmpty {
-            let dedupeTime: TimeInterval = 0.2
-            DispatchQueue.main.asyncDeduped(target: self, after: dedupeTime) { [weak self] in
-                self?.runFetchRecordQueue()
+        runOnMain {
+            if !self.fetchRecordQueue.isEmpty {
+                let dedupeTime: TimeInterval = 0.2
+                DispatchQueue.main.asyncDeduped(target: self, after: dedupeTime) { [weak self] in
+                    self?.runFetchRecordQueue()
+                }
             }
         }
     }
