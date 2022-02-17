@@ -419,18 +419,40 @@ internal class CloudKitManager {
 
     }
 
+    private var retrySaveQueue = [String: [(() -> ())]]()
+
+    private var inflightSave = [String: Bool]()
+
     private func saveRecord<T>(_ record: CKRecord,
                                cloudPath: String,
                                originalItem: T,
                                tmpFileToDelete: URL?,
                                compression: compression_algorithm?,
                                retry: @escaping (() -> ())) where T: FileSyncable {
+        guard inflightSave[cloudPath] != true else {
+            DebugLog("Slowing \(cloudPath) record save requests")
+
+            if var existing = retrySaveQueue[cloudPath] {
+                existing.append(retry)
+                retrySaveQueue[cloudPath] = existing
+            } else {
+                retrySaveQueue[cloudPath] = [retry]
+            }
+            return
+        }
+
+        inflightSave[cloudPath] = true
+
         let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
         operation.configuration.qualityOfService = qualityOfService
         operation.configuration.timeoutIntervalForRequest = 60
         operation.isAtomic = false
 
-        operation.perRecordCompletionBlock = { ckRecord, error in
+        operation.perRecordCompletionBlock = { [weak self] ckRecord, error in
+            guard let self = self else { return }
+
+            self.inflightSave[cloudPath] = false
+
             if let error = error as NSError? {
                 if let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
                     DebugLog("CloudKit rejected with retry timeout: \(retryAfter)")
@@ -476,6 +498,18 @@ internal class CloudKitManager {
                                                   version: version,
                                                   deleted: false,
                                                   compressed: compression != nil)
+
+                DispatchQueue.main.async {
+                    if var retryQueue = self.retrySaveQueue[cloudPath],
+                       !retryQueue.isEmpty,
+                        self.inflightSave[cloudPath] != true {
+                        DebugLog("Doing deferred \(cloudPath) record save to CloudKit")
+
+                        let retry = retryQueue.removeFirst()
+                        self.retrySaveQueue[cloudPath] = retryQueue
+                        retry()
+                    }
+                }
             }
         }
 
