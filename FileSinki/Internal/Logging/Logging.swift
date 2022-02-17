@@ -9,8 +9,8 @@
 
 import Foundation
 
-func DebugLog(_ string: String) {
-    #if DEBUG
-    print("FileSinki: " + string)
+func DebugLog(_ string:  @autoclosure () -> String) {
+    #if DEBUG    
+    print("FileSinki: " + string())
     #endif
 }
