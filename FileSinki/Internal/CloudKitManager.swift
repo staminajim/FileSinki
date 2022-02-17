@@ -120,11 +120,12 @@ internal final class CloudKitManager {
         ifHaveZone {
             let remoteCompression = compression ?? COMPRESSION_LZFSE
 
-            let predicate = NSPredicate(format: "\(RecordKey.recordID.rawValue) = %@",
-                                        CKRecord.ID(recordName: cloudPath.toRecordID(root: searchPathDirectory),
-                                                    zoneID: CloudKitManager.privateZoneId))
+            let recordID = CKRecord.ID(recordName: cloudPath.toRecordID(root: searchPathDirectory),
+                        zoneID: CloudKitManager.privateZoneId)
 
-            self.fetchRecords(predicate: predicate, path: cloudPath) { fileSinkiRecords in
+            self.fetchRecord(recordID: recordID,
+                             path: cloudPath,
+                             searchPathDirectory: searchPathDirectory) { fileSinkiRecords in
                 guard let fileSinkiRecord = fileSinkiRecords.first else {
                     onReceive(cloudPath, nil, false)   // no records
                     return
@@ -240,9 +241,11 @@ internal final class CloudKitManager {
 
     // MARK: - Private fetching and saving
 
+    typealias FetchCompletion = ((_ records: [CKRecord]) -> ())
+
     private func fetchRecords(predicate: NSPredicate,
                               path: String,
-                              fetched: @escaping ((_ records: [CKRecord]) -> ())) {        
+                              fetched: @escaping FetchCompletion) {
         let query = CKQuery(recordType: CloudKitManager.fileSinkiRecordType, predicate: predicate)
         var operation = CKQueryOperation(query: query)
         operation.zoneID = CloudKitManager.privateZoneId
@@ -287,6 +290,109 @@ internal final class CloudKitManager {
 
         privateDatabase.add(operation)
     }
+
+    // MARK: Batched Fetching
+
+    private struct FetchRecordQueueItem {
+        let recordID: CKRecord.ID
+        let path: String
+        let searchPathDirectory: FileManager.SearchPathDirectory
+        let fetched: FetchCompletion
+    }
+
+    private var fetchRecordQueue = [FetchRecordQueueItem]()
+
+    private func runFetchRecordQueue() {
+        guard !fetchingRecordBatch else {
+            return
+        }
+        let maxRecordsPerBatch: Int = 99
+
+        var batch = [FetchRecordQueueItem]()
+
+        var recordsRemaining = maxRecordsPerBatch
+        while !fetchRecordQueue.isEmpty && recordsRemaining > 0 {
+            batch.append(fetchRecordQueue.removeFirst())
+            recordsRemaining -= 1
+        }
+
+        debouncedRecordFetch()
+
+        fetchRecordBatch(batch)
+    }
+
+    private func debouncedRecordFetch() {
+        if !fetchRecordQueue.isEmpty {
+            let dedupeTime: TimeInterval = 0.2
+            DispatchQueue.main.asyncDeduped(target: self, after: dedupeTime) { [weak self] in
+                self?.runFetchRecordQueue()
+            }
+        }
+    }
+
+    private var fetchingRecordBatch: Bool = false
+
+    private func fetchRecordBatch(_ batch: [FetchRecordQueueItem]) {
+        guard batch.count > 0 else { return }
+
+        fetchingRecordBatch = true
+
+        let operation = CKFetchRecordsOperation(recordIDs: batch.map { $0.recordID })
+
+        operation.configuration.qualityOfService = qualityOfService
+        operation.configuration.timeoutIntervalForRequest = 60
+
+        operation.fetchRecordsCompletionBlock = { records, error in
+            self.fetchingRecordBatch = false
+
+            if let error = error as NSError? {
+                if let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+                    DebugLog("CloudKit rejected with retry timeout: \(retryAfter)")
+                       DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + retryAfter,
+                                                     execute: { () -> Void in
+                                                        self.fetchRecordBatch(batch)
+                       })
+                    return
+                } else {
+                    for item in batch {
+                        if let record = records?[item.recordID] {
+                            item.fetched([record])
+                        } else {
+                            item.fetched([])
+                        }
+                    }
+                }
+            } else {
+                for item in batch {
+                    if let record = records?[item.recordID] {
+                        item.fetched([record])
+                    } else {
+                        DebugLog("Couldn't find \(item.path) in CloudKit")
+                        item.fetched([])
+                    }
+                }
+            }
+
+            self.debouncedRecordFetch()
+        }
+
+        privateDatabase.add(operation)
+    }
+
+    private func fetchRecord(recordID: CKRecord.ID,
+                             path: String,
+                             searchPathDirectory: FileManager.SearchPathDirectory,
+                             fetched: @escaping FetchCompletion) {
+        let queueItem = FetchRecordQueueItem(recordID: recordID,
+                                             path: path,
+                                             searchPathDirectory: searchPathDirectory,
+                                             fetched: fetched)
+        fetchRecordQueue.append(queueItem)
+
+        debouncedRecordFetch()
+    }
+
+    // MARK: Saving and Deleting
 
     private func saveOrDeleteRecord<T>(recordID: String,
                                        cloudPath: String,
