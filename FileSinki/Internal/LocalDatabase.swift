@@ -34,7 +34,7 @@ internal struct FileSinkiRecord: Codable, Equatable {
     }
 }
 
-internal class LocalDatabase {
+internal final class LocalDatabase {
 
     private let compression = COMPRESSION_LZFSE
 

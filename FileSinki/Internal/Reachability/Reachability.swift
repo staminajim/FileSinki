@@ -18,7 +18,7 @@ internal extension Notification.Name {
 }
 
 /// This is a slimmed down interpretation of apple's reachability example code in swift
-internal class Reachability {
+internal final class Reachability {
 
     enum Status {
         case notReachable

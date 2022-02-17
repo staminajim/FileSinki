@@ -12,7 +12,7 @@ import Foundation
 import CloudKit
 import Compression
 
-internal class CloudKitManager {
+internal final class CloudKitManager {
 
     enum RecordKey: String {
        case recordID

@@ -11,7 +11,7 @@
 import Foundation
 import CloudKit
 
-internal class ObserverManager {
+internal final class ObserverManager {
 
     private let cloudKitManager: CloudKitManager
     private let localDB: LocalDatabase
@@ -216,7 +216,7 @@ internal class ObserverRecord {
 
 }
 
-internal class TypedObserverRecord<T: FileSyncable>: ObserverRecord {
+internal final class TypedObserverRecord<T: FileSyncable>: ObserverRecord {
 
     let type: T.Type
     let onTypedChange: FileSinki.ChangeItem<T>.Changed

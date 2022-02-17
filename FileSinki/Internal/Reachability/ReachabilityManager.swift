@@ -10,7 +10,7 @@
 
 import Foundation
 
-internal class ReachabilityManager {
+internal final class ReachabilityManager {
 
     private let reachability: Reachability?
 
