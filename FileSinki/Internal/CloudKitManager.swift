@@ -423,21 +423,23 @@ internal final class CloudKitManager {
                     path: cloudPath,
                     searchPathDirectory: searchPathDirectory) { fileSinkiRecords in
             let sendRecordToCloud = { record in
-                self.saveRecord(record,
-                                cloudPath: cloudPath,
-                                originalItem: originalItem,
-                                tmpFileToDelete: nil,
-                                compression: compression,
-                                retry: { [weak self] in
-                    self?.saveOrDeleteRecord(recordID: recordID,
-                                             cloudPath: cloudPath,
-                                             searchPathDirectory: searchPathDirectory,
-                                             originalItem: originalItem,
-                                             data: dataToWrite,
-                                             delete: delete,
-                                             compression: compression,
-                                             finalVersion: finalVersion)
-                })
+                runOnMain {
+                    self.saveRecord(record,
+                                    cloudPath: cloudPath,
+                                    originalItem: originalItem,
+                                    tmpFileToDelete: nil,
+                                    compression: compression,
+                                    retry: { [weak self] in
+                        self?.saveOrDeleteRecord(recordID: recordID,
+                                                 cloudPath: cloudPath,
+                                                 searchPathDirectory: searchPathDirectory,
+                                                 originalItem: originalItem,
+                                                 data: dataToWrite,
+                                                 delete: delete,
+                                                 compression: compression,
+                                                 finalVersion: finalVersion)
+                    })
+                }
             }
 
 
