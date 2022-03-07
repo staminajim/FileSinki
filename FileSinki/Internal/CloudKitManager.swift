@@ -423,23 +423,21 @@ internal final class CloudKitManager {
                     path: cloudPath,
                     searchPathDirectory: searchPathDirectory) { fileSinkiRecords in
             let sendRecordToCloud = { record in
-                runOnMain {
-                    self.saveRecord(record,
-                                    cloudPath: cloudPath,
-                                    originalItem: originalItem,
-                                    tmpFileToDelete: nil,
-                                    compression: compression,
-                                    retry: { [weak self] in
-                        self?.saveOrDeleteRecord(recordID: recordID,
-                                                 cloudPath: cloudPath,
-                                                 searchPathDirectory: searchPathDirectory,
-                                                 originalItem: originalItem,
-                                                 data: dataToWrite,
-                                                 delete: delete,
-                                                 compression: compression,
-                                                 finalVersion: finalVersion)
-                    })
-                }
+                self.saveRecord(record,
+                                cloudPath: cloudPath,
+                                originalItem: originalItem,
+                                tmpFileToDelete: nil,
+                                compression: compression,
+                                retry: { [weak self] in
+                    self?.saveOrDeleteRecord(recordID: recordID,
+                                             cloudPath: cloudPath,
+                                             searchPathDirectory: searchPathDirectory,
+                                             originalItem: originalItem,
+                                             data: dataToWrite,
+                                             delete: delete,
+                                             compression: compression,
+                                             finalVersion: finalVersion)
+                })
             }
 
 
@@ -533,12 +531,15 @@ internal final class CloudKitManager {
 
     private var inflightSave = [String: Bool]()
 
+    private let inflightSaveLock = NSLock()
+
     private func saveRecord<T>(_ record: CKRecord,
                                cloudPath: String,
                                originalItem: T,
                                tmpFileToDelete: URL?,
                                compression: compression_algorithm?,
                                retry: @escaping (() -> ())) where T: FileSyncable {
+        inflightSaveLock.lock()
         guard inflightSave[cloudPath] != true else {
             DebugLog("Slowing \(cloudPath) record save requests")
 
@@ -548,10 +549,12 @@ internal final class CloudKitManager {
             } else {
                 retrySaveQueue[cloudPath] = [retry]
             }
+            inflightSaveLock.unlock()
             return
         }
 
         inflightSave[cloudPath] = true
+        inflightSaveLock.unlock()
 
         let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
         operation.configuration.qualityOfService = qualityOfService
@@ -561,7 +564,9 @@ internal final class CloudKitManager {
         operation.perRecordCompletionBlock = { [weak self] ckRecord, error in
             guard let self = self else { return }
 
+            self.inflightSaveLock.lock()
             self.inflightSave[cloudPath] = false
+            self.inflightSaveLock.unlock()
 
             if let error = error as NSError? {
                 if let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
@@ -610,6 +615,7 @@ internal final class CloudKitManager {
                                                   compressed: compression != nil)
 
                 DispatchQueue.main.async {
+                    self.inflightSaveLock.lock()
                     if var retryQueue = self.retrySaveQueue[cloudPath],
                        !retryQueue.isEmpty,
                         self.inflightSave[cloudPath] != true {
@@ -617,7 +623,11 @@ internal final class CloudKitManager {
 
                         let retry = retryQueue.removeFirst()
                         self.retrySaveQueue[cloudPath] = retryQueue
+
+                        self.inflightSaveLock.unlock()
                         retry()
+                    } else {
+                        self.inflightSaveLock.unlock()
                     }
                 }
             }
