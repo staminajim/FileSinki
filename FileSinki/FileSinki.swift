@@ -367,3 +367,19 @@ public extension FileSinki {
     }
 
 }
+
+// MARK: - CloudKit Operation Queue
+
+private let cloudKitDispatchQueue = DispatchQueue(label: "FileSinki.iCloud", qos: .userInitiated)
+
+public extension FileSinki {
+
+    static var cloudOperationQueue: OperationQueue = {
+        let queue = OperationQueue()
+        queue.name = "FileSinki.iCloud"
+        queue.underlyingQueue = cloudKitDispatchQueue
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
+
+}

@@ -248,6 +248,7 @@ internal final class CloudKitManager {
                               fetched: @escaping FetchCompletion) {
         let query = CKQuery(recordType: CloudKitManager.fileSinkiRecordType, predicate: predicate)
         var operation = CKQueryOperation(query: query)
+        operation.database = privateDatabase
         operation.zoneID = CloudKitManager.privateZoneId
         operation.configuration.qualityOfService = qualityOfService
         operation.configuration.timeoutIntervalForRequest = 60
@@ -266,7 +267,7 @@ internal final class CloudKitManager {
                 nextOperation.queryCompletionBlock = operation.queryCompletionBlock
                 nextOperation.resultsLimit = operation.resultsLimit
                 operation = nextOperation
-                self.privateDatabase.add(operation)
+                FileSinki.cloudOperationQueue.addOperation(operation)
                 return
             }
 
@@ -288,7 +289,7 @@ internal final class CloudKitManager {
             }
         }
 
-        privateDatabase.add(operation)
+        FileSinki.cloudOperationQueue.addOperation(operation)
     }
 
     // MARK: Batched Fetching
@@ -341,6 +342,7 @@ internal final class CloudKitManager {
 
         let operation = CKFetchRecordsOperation(recordIDs: batch.map { $0.recordID })
 
+        operation.database = privateDatabase
         operation.configuration.qualityOfService = qualityOfService
         operation.configuration.timeoutIntervalForRequest = 60
 
@@ -378,7 +380,7 @@ internal final class CloudKitManager {
             self.debouncedRecordFetch()
         }
 
-        privateDatabase.add(operation)
+        FileSinki.cloudOperationQueue.addOperation(operation)
     }
 
     private func fetchRecord(recordID: CKRecord.ID,
@@ -557,6 +559,7 @@ internal final class CloudKitManager {
         inflightSaveLock.unlock()
 
         let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
+        operation.database = privateDatabase
         operation.configuration.qualityOfService = qualityOfService
         operation.configuration.timeoutIntervalForRequest = 60
         operation.isAtomic = false
@@ -633,7 +636,7 @@ internal final class CloudKitManager {
             }
         }
 
-        privateDatabase.add(operation)
+        FileSinki.cloudOperationQueue.addOperation(operation)
     }
 
     // MARK: - Notification Subscription
@@ -665,6 +668,7 @@ internal final class CloudKitManager {
 
             let operation = CKModifySubscriptionsOperation(subscriptionsToSave: [subscription],
                                                            subscriptionIDsToDelete: nil)
+            operation.database = self.privateDatabase
             operation.configuration.qualityOfService = self.qualityOfService
             operation.configuration.timeoutIntervalForRequest = 60
 
@@ -676,7 +680,7 @@ internal final class CloudKitManager {
                 }
                 DebugLog("Subscribed for notification changes to \(recordID)")
             }
-            self.privateDatabase.add(operation)
+            FileSinki.cloudOperationQueue.addOperation(operation)
         }
     }
 
@@ -704,6 +708,7 @@ internal final class CloudKitManager {
         
         let zone = CKRecordZone(zoneID: CloudKitManager.privateZoneId)
         let operation = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
+        operation.database = privateDatabase
         operation.configuration.qualityOfService = qualityOfService
 
         operation.modifyRecordZonesCompletionBlock = { savedZones, deletedZoneIds, error in
@@ -741,7 +746,7 @@ internal final class CloudKitManager {
                 self.loadingZone = false
             }
         }
-        privateDatabase.add(operation)
+        FileSinki.cloudOperationQueue.addOperation(operation)
     }
 
 }
