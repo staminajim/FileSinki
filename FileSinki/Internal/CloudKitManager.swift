@@ -567,15 +567,16 @@ internal final class CloudKitManager {
         operation.perRecordCompletionBlock = { [weak self] ckRecord, error in
             guard let self = self else { return }
 
-            self.inflightSaveLock.lock()
-            self.inflightSave[cloudPath] = false
-            self.inflightSaveLock.unlock()
-
             if let error = error as NSError? {
                 if let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
                     DebugLog("CloudKit rejected with retry timeout: \(retryAfter)")
                     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + retryAfter,
                                                   execute: { () -> Void in
+
+                        self.inflightSaveLock.lock()
+                        self.inflightSave[cloudPath] = false
+                        self.inflightSaveLock.unlock()
+
                         self.saveRecord(record,
                                         cloudPath: cloudPath,
                                         originalItem: originalItem,
@@ -587,11 +588,20 @@ internal final class CloudKitManager {
                     // record has changed since we fetched, need to try again.
                     DebugLog("\(cloudPath) server record has changed since fetch. Trying again.")
                     DispatchQueue.main.async {
+                        self.inflightSaveLock.lock()
+                        self.inflightSave[cloudPath] = false
+                        self.inflightSaveLock.unlock()
+
                         retry()
                     }
                 } else if error.code == CKError.Code.limitExceeded.rawValue {
                     DebugLog("File for \(cloudPath) was too big for CloudKit, saving data as an Asset")
                     record.moveDataToAsset { tmpFileToDelete in
+
+                        self.inflightSaveLock.lock()
+                        self.inflightSave[cloudPath] = false
+                        self.inflightSaveLock.unlock()
+
                         self.saveRecord(record,
                                         cloudPath: cloudPath,
                                         originalItem: originalItem,
@@ -617,7 +627,12 @@ internal final class CloudKitManager {
                                                   deleted: false,
                                                   compressed: compression != nil)
 
+                self.inflightSaveLock.lock()
+                self.inflightSave[cloudPath] = false
+                self.inflightSaveLock.unlock()
+                
                 DispatchQueue.main.async {
+                    
                     self.inflightSaveLock.lock()
                     if var retryQueue = self.retrySaveQueue[cloudPath],
                        !retryQueue.isEmpty,
