@@ -705,22 +705,44 @@ internal final class CloudKitManager {
 
     private var loadingZone: Bool = false
 
+    private var loadingZoneFatalError: Bool = false
+
     private var onZoneLoaded = [() -> ()]()
 
+    private let zoneLoadingLock = NSLock()
+
     func ifHaveZone(_ doWork: @escaping () -> ()) {
+        zoneLoadingLock.lock()
+        if loadingZoneFatalError {
+            zoneLoadingLock.unlock()
+            return
+        }
         if haveZone {
+            zoneLoadingLock.unlock()
             doWork()
             return
         }
-        onZoneLoaded.append(doWork)
-        createFileSinkiZone()
+        if onZoneLoaded.count < 1000 {  // a sensible yet high limit
+            onZoneLoaded.append(doWork)
+        }
+        let currentlyLoading = loadingZone
+        zoneLoadingLock.unlock()
+        if !currentlyLoading {
+            createFileSinkiZone()
+        }
     }
 
     private func createFileSinkiZone() {
-        guard !loadingZone, !loadingZone else { return }
+        zoneLoadingLock.lock()
+        guard !loadingZone, !haveZone, !loadingZoneFatalError else {
+            zoneLoadingLock.unlock()
+            return
+        }
 
         loadingZone = true
-        
+
+        zoneLoadingLock.unlock()
+
         let zone = CKRecordZone(zoneID: CloudKitManager.privateZoneId)
         let operation = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
         operation.database = privateDatabase
@@ -728,37 +750,53 @@ internal final class CloudKitManager {
 
         operation.modifyRecordZonesCompletionBlock = { savedZones, deletedZoneIds, error in
             if let error = error {
-                runOnMain {
+                guard let error = error as? CKError else {
+                    self.zoneLoadingLock.lock()
                     self.haveZone = false
                     self.loadingZone = false
+                    self.loadingZoneFatalError = true
+                    self.zoneLoadingLock.unlock()
+                    return
                 }
 
-                DebugLog("Failed to create CloudKit Zone: \(error)")
-                if (error as NSError).code == CKError.Code.notAuthenticated.rawValue { return }
-                if (error as NSError).code == CKError.Code.networkUnavailable.rawValue { return }
+                self.zoneLoadingLock.lock()
 
-                if (error as NSError).code == CKError.Code.networkFailure.rawValue {
-                    // try again later. Your internet has problems.
-                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 60,
-                                                  execute: { () -> Void in
-                                                     self.createFileSinkiZone()
-                    })
-
+                switch error.code {
+                case .notAuthenticated, .internalError, .partialFailure,
+                        .badContainer, .serviceUnavailable,
+                        .missingEntitlement, .permissionFailure,
+                        .incompatibleVersion, .constraintViolation,
+                        .badDatabase, .quotaExceeded, .managedAccountRestricted,
+                        .accountTemporarilyUnavailable:
+                    self.loadingZoneFatalError = true
+                    self.onZoneLoaded.removeAll()
+                    break
+                case .requestRateLimited, .zoneBusy:
+                    // we'll come back later
+                    break
+                default:
+                    break
                 }
+                self.haveZone = false
+                self.loadingZone = false
+
+                self.zoneLoadingLock.unlock()
                 return
             }
 
             runOnMain {
                 DebugLog("CloudKit Zone ready")
 
+                self.zoneLoadingLock.lock()
                 let copy = self.onZoneLoaded
                 self.onZoneLoaded.removeAll()
+                self.haveZone = true
+                self.loadingZone = false
+                self.zoneLoadingLock.unlock()
+
                 for completion in copy {
                     completion()
                 }
-
-                self.haveZone = true
-                self.loadingZone = false
             }
         }
         FileSinki.cloudOperationQueue.addOperation(operation)
