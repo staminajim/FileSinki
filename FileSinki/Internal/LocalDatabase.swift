@@ -34,13 +34,14 @@ internal struct FileSinkiRecord: Codable, Equatable {
     }
 }
 
-internal final class LocalDatabase {
+internal final class LocalDatabase: NSObject {
 
     private let compression = COMPRESSION_LZFSE
 
-    init() {
+    override init() {
         knownLocalFiles = [String: FileSinkiRecord].loadFromLocal(fileURL: LocalDatabase.knownLocalFilesURL,
                                                                   compression: compression) ?? [String: FileSinkiRecord]()
+        super.init()
     }
 
     // MARK: - Type Map
@@ -80,12 +81,11 @@ internal final class LocalDatabase {
             self.knownLocalFiles[recordID] = newRecord
 
             let dedupeTime: TimeInterval = 1
-            DispatchQueue.main.asyncDeduped(target: self, after: dedupeTime) {
-                let copy = self.knownLocalFiles
-                runAsync {
-                    copy.saveLocalTo(fileURL: LocalDatabase.knownLocalFilesURL, compression: self.compression)
-                }
-            }
+            NSObject.cancelPreviousPerformRequests(withTarget: self)
+
+            self.perform(#selector(self.saveLocalKnownFiles),
+                         with: nil,
+                         afterDelay: dedupeTime)
         }
     }
 
@@ -117,12 +117,11 @@ internal final class LocalDatabase {
             self.knownLocalFiles[recordID] = newRecord
 
             let dedupeTime: TimeInterval = 1
-            DispatchQueue.main.asyncDeduped(target: self, after: dedupeTime) {
-                let copy = self.knownLocalFiles
-                runAsync {
-                    copy.saveLocalTo(fileURL: LocalDatabase.knownLocalFilesURL, compression: self.compression)
-                }
-            }
+            NSObject.cancelPreviousPerformRequests(withTarget: self)
+
+            self.perform(#selector(self.saveLocalKnownFiles),
+                         with: nil,
+                         afterDelay: dedupeTime)
         }
     }
 
@@ -132,12 +131,11 @@ internal final class LocalDatabase {
                 return
             }
             let dedupeTime: TimeInterval = 1
-            DispatchQueue.main.asyncDeduped(target: self, after: dedupeTime) {
-                let copy = self.knownLocalFiles
-                runAsync {
-                    copy.saveLocalTo(fileURL: LocalDatabase.knownLocalFilesURL, compression: self.compression)
-                }
-            }
+            NSObject.cancelPreviousPerformRequests(withTarget: self)
+
+            self.perform(#selector(self.saveLocalKnownFiles),
+                         with: nil,
+                         afterDelay: dedupeTime)
         }
     }
 
@@ -157,6 +155,15 @@ internal final class LocalDatabase {
             }
         }
         return matching
+    }
+
+    // MARK: - Saving
+
+    @objc private func saveLocalKnownFiles() {
+        let copy = self.knownLocalFiles
+        runAsync {
+            copy.saveLocalTo(fileURL: LocalDatabase.knownLocalFilesURL, compression: self.compression)
+        }
     }
 
     // MARK: - Automatic fetching and refetching of things

@@ -12,7 +12,7 @@ import Foundation
 import CloudKit
 import Compression
 
-internal final class CloudKitManager {
+internal final class CloudKitManager: NSObject {
 
     enum RecordKey: String {
        case recordID
@@ -271,19 +271,56 @@ internal final class CloudKitManager {
                 return
             }
 
-            if let error = error as NSError? {
-                if let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+            if let error = error {
+                guard let error = error as? CKError else {
+                    self.zoneLoadingLock.lock()
+                    DebugLog("Ignoring CloudKit due to unkown error")
+                    self.loadingZoneFatalError = true
+                    self.zoneLoadingLock.unlock()
+
+                    DebugLog("Couldn't find \(path) in CloudKit \(error)")
+                    fetched(fileSinkiRecords)
+                    return
+                }
+
+                self.zoneLoadingLock.lock()
+
+                let retryTimeout: TimeInterval?
+
+                switch error.code {
+                case .notAuthenticated, .internalError,
+                        .badContainer, .serviceUnavailable,
+                        .missingEntitlement, .permissionFailure,
+                        .incompatibleVersion, .constraintViolation,
+                        .badDatabase, .quotaExceeded, .managedAccountRestricted,
+                        .accountTemporarilyUnavailable:
+                    DebugLog("Ignoring CloudKit due to error \(error)")
+                    self.loadingZoneFatalError = true   // bail out from cloudkit until next app launch
+                    retryTimeout = nil
+                    break
+                case .requestRateLimited, .zoneBusy:
+                    // we'll come back later
+                    retryTimeout = error.retryAfterSeconds
+                    break
+                default:
+                    retryTimeout = nil
+                    break
+                }
+                self.zoneLoadingLock.unlock()
+
+                if let retryAfter = retryTimeout {
                     DebugLog("CloudKit rejected with retry timeout: \(retryAfter)")
-                       DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + retryAfter,
-                                                     execute: { () -> Void in
-                                                        self.fetchRecords(predicate: predicate,
-                                                                          path: path,
-                                                                          fetched: fetched)
-                       })
+                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + retryAfter,
+                                                 execute: { () -> Void in
+                                                    self.fetchRecords(predicate: predicate,
+                                                                      path: path,
+                                                                      fetched: fetched)
+                    })
                 } else {
                     DebugLog("Couldn't find \(path) in CloudKit \(error)")
                     fetched(fileSinkiRecords)
                 }
+                return
             } else {
                 fetched(fileSinkiRecords)
             }
@@ -303,7 +340,7 @@ internal final class CloudKitManager {
 
     private var fetchRecordQueue = [FetchRecordQueueItem]()
 
-    private func runFetchRecordQueue() {
+    @objc private func runFetchRecordQueue() {
         guard !fetchingRecordBatch else {
             return
         }
@@ -326,9 +363,11 @@ internal final class CloudKitManager {
         runOnMain {
             if !self.fetchRecordQueue.isEmpty {
                 let dedupeTime: TimeInterval = 0.2
-                DispatchQueue.main.asyncDeduped(target: self, after: dedupeTime) { [weak self] in
-                    self?.runFetchRecordQueue()
-                }
+                NSObject.cancelPreviousPerformRequests(withTarget: self)
+
+                self.perform(#selector(self.runFetchRecordQueue),
+                             with: nil,
+                             afterDelay: dedupeTime)
             }
         }
     }
@@ -349,14 +388,54 @@ internal final class CloudKitManager {
         operation.fetchRecordsCompletionBlock = { records, error in
             self.fetchingRecordBatch = false
 
-            if let error = error as NSError? {
-                if let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+            if let error = error {
+                guard let error = error as? CKError else {
+                    self.zoneLoadingLock.lock()
+                    DebugLog("Ignoring CloudKit due to unkown error")
+                    self.loadingZoneFatalError = true
+                    self.zoneLoadingLock.unlock()
+
+                    for item in batch {
+                        if let record = records?[item.recordID] {
+                            item.fetched([record])
+                        } else {
+                            item.fetched([])
+                        }
+                    }
+                    return
+                }
+
+                self.zoneLoadingLock.lock()
+
+                let retryTimeout: TimeInterval?
+
+                switch error.code {
+                case .notAuthenticated, .internalError,
+                        .badContainer, .serviceUnavailable,
+                        .missingEntitlement, .permissionFailure,
+                        .incompatibleVersion, .constraintViolation,
+                        .badDatabase, .quotaExceeded, .managedAccountRestricted,
+                        .accountTemporarilyUnavailable:
+                    DebugLog("Ignoring CloudKit due to error \(error)")
+                    self.loadingZoneFatalError = true   // bail out from cloudkit until next app launch
+                    retryTimeout = nil
+                    break
+                case .requestRateLimited, .zoneBusy:
+                    // we'll come back later
+                    retryTimeout = error.retryAfterSeconds
+                    break
+                default:
+                    retryTimeout = nil
+                    break
+                }
+                self.zoneLoadingLock.unlock()
+
+                if let retryAfter = retryTimeout {
                     DebugLog("CloudKit rejected with retry timeout: \(retryAfter)")
                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + retryAfter,
                                                      execute: { () -> Void in
                                                         self.fetchRecordBatch(batch)
                        })
-                    return
                 } else {
                     for item in batch {
                         if let record = records?[item.recordID] {
@@ -366,7 +445,9 @@ internal final class CloudKitManager {
                         }
                     }
                 }
+                return
             } else {
+                // success
                 for item in batch {
                     if let record = records?[item.recordID] {
                         item.fetched([record])
@@ -376,7 +457,6 @@ internal final class CloudKitManager {
                     }
                 }
             }
-
             self.debouncedRecordFetch()
         }
 
@@ -567,8 +647,71 @@ internal final class CloudKitManager {
         operation.perRecordCompletionBlock = { [weak self] ckRecord, error in
             guard let self = self else { return }
 
-            if let error = error as NSError? {
-                if let retryAfter = error.userInfo[CKErrorRetryAfterKey] as? TimeInterval {
+
+            if let error = error {
+                guard let error = error as? CKError else {
+                    self.zoneLoadingLock.lock()
+                    DebugLog("Ignoring CloudKit due to unkown error")
+                    self.loadingZoneFatalError = true
+                    self.zoneLoadingLock.unlock()
+                    return
+                }
+
+                self.zoneLoadingLock.lock()
+
+                let retryTimeout: TimeInterval?
+
+                switch error.code {
+                case .serverRecordChanged:
+                    // record has changed since we fetched, need to try again.
+                    self.zoneLoadingLock.unlock()
+
+                    DebugLog("\(cloudPath) server record has changed since fetch. Trying again.")
+                    DispatchQueue.main.async {
+                        self.inflightSaveLock.lock()
+                        self.inflightSave[cloudPath] = false
+                        self.inflightSaveLock.unlock()
+
+                        retry()
+                    }
+                    return
+                case .limitExceeded:
+                    DebugLog("File for \(cloudPath) was too big for CloudKit, saving data as an Asset")
+                    self.zoneLoadingLock.unlock()
+                    record.moveDataToAsset { tmpFileToDelete in
+                        self.inflightSaveLock.lock()
+                        self.inflightSave[cloudPath] = false
+                        self.inflightSaveLock.unlock()
+
+                        self.saveRecord(record,
+                                        cloudPath: cloudPath,
+                                        originalItem: originalItem,
+                                        tmpFileToDelete: tmpFileToDelete,
+                                        compression: compression,
+                                        retry: retry)
+                    }
+                    return
+                case .notAuthenticated, .internalError,
+                        .badContainer, .serviceUnavailable,
+                        .missingEntitlement, .permissionFailure,
+                        .incompatibleVersion, .constraintViolation,
+                        .badDatabase, .quotaExceeded, .managedAccountRestricted,
+                        .accountTemporarilyUnavailable:
+                    DebugLog("Ignoring CloudKit due to error \(error)")
+                    self.loadingZoneFatalError = true   // bail out from cloudkit until next app launch
+                    retryTimeout = nil
+                    break
+                case .requestRateLimited, .zoneBusy:
+                    // we'll come back later
+                    retryTimeout = error.retryAfterSeconds
+                    break
+                default:
+                    retryTimeout = nil
+                    break
+                }
+                self.zoneLoadingLock.unlock()
+
+                if let retryAfter = retryTimeout {
                     DebugLog("CloudKit rejected with retry timeout: \(retryAfter)")
                     DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + retryAfter,
                                                   execute: { () -> Void in
@@ -584,35 +727,13 @@ internal final class CloudKitManager {
                                         compression: compression,
                                         retry: retry)
                      })
-                } else if error.code == CKError.Code.serverRecordChanged.rawValue {
-                    // record has changed since we fetched, need to try again.
-                    DebugLog("\(cloudPath) server record has changed since fetch. Trying again.")
-                    DispatchQueue.main.async {
-                        self.inflightSaveLock.lock()
-                        self.inflightSave[cloudPath] = false
-                        self.inflightSaveLock.unlock()
-
-                        retry()
-                    }
-                } else if error.code == CKError.Code.limitExceeded.rawValue {
-                    DebugLog("File for \(cloudPath) was too big for CloudKit, saving data as an Asset")
-                    record.moveDataToAsset { tmpFileToDelete in
-
-                        self.inflightSaveLock.lock()
-                        self.inflightSave[cloudPath] = false
-                        self.inflightSaveLock.unlock()
-
-                        self.saveRecord(record,
-                                        cloudPath: cloudPath,
-                                        originalItem: originalItem,
-                                        tmpFileToDelete: tmpFileToDelete,
-                                        compression: compression,
-                                        retry: retry)
-                    }
+                    return
                 } else {
                     DebugLog("Failed to save \(cloudPath) record to CloudKit \(error)")
                 }
+                return
             } else {
+                // success
                 if let tmpFileToDelete = tmpFileToDelete {
                     try? FileManager.default.removeItem(at: tmpFileToDelete)
                 }
@@ -630,9 +751,9 @@ internal final class CloudKitManager {
                 self.inflightSaveLock.lock()
                 self.inflightSave[cloudPath] = false
                 self.inflightSaveLock.unlock()
-                
+
                 DispatchQueue.main.async {
-                    
+
                     self.inflightSaveLock.lock()
                     if var retryQueue = self.retrySaveQueue[cloudPath],
                        !retryQueue.isEmpty,
@@ -754,6 +875,7 @@ internal final class CloudKitManager {
                     self.zoneLoadingLock.lock()
                     self.haveZone = false
                     self.loadingZone = false
+                    DebugLog("Ignoring CloudKit due to unkown error")
                     self.loadingZoneFatalError = true
                     self.zoneLoadingLock.unlock()
                     return
@@ -768,6 +890,7 @@ internal final class CloudKitManager {
                         .incompatibleVersion, .constraintViolation,
                         .badDatabase, .quotaExceeded, .managedAccountRestricted,
                         .accountTemporarilyUnavailable:
+                    DebugLog("Ignoring CloudKit due to error \(error)")
                     self.loadingZoneFatalError = true
                     self.onZoneLoaded.removeAll()
                     break
