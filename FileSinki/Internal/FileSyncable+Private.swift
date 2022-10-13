@@ -120,7 +120,7 @@ internal extension FileSyncable {
             loaded(local.decoded, false)
 
             if loadFromCloud {
-                FileSinki.cloudKitManager.loadDataFromCloud(fileURL: fileURL,
+                FileSinki.cloudKitManager?.loadDataFromCloud(fileURL: fileURL,
                                                             type: self,
                                                             searchPathDirectory: searchPathDirectory,
                                                             compression: compression) { (dataPath, decompressedData, remoteIsDeleted) in
@@ -289,14 +289,14 @@ internal extension FileSyncable {
         }
         if let compression = compression,
             let zipData = jsonData.compress(algorithm: compression) {
-            FileSinki.cloudKitManager.saveDataToCloud(fileURL: fileURL,
+            FileSinki.cloudKitManager?.saveDataToCloud(fileURL: fileURL,
                                                       searchPathDirectory: searchPathDirectory,
                                                       originalItem: self,
                                                       data: zipData,
                                                       compression: compression,
                                                       finalVersion: finalVersion)
         } else {
-            FileSinki.cloudKitManager.saveDataToCloud(fileURL: fileURL,
+            FileSinki.cloudKitManager?.saveDataToCloud(fileURL: fileURL,
                                                       searchPathDirectory: searchPathDirectory,
                                                       originalItem: self,
                                                       data: jsonData,
@@ -310,7 +310,7 @@ internal extension FileSyncable {
                          compression: compression_algorithm?,
                          payloadData: Data,
                          finalVersion: @escaping (_ item: Self) -> ()) {
-        FileSinki.cloudKitManager.saveDataToCloud(fileURL: fileURL,
+        FileSinki.cloudKitManager?.saveDataToCloud(fileURL: fileURL,
                                                   searchPathDirectory: searchPathDirectory,
                                                   originalItem: self,
                                                   data: payloadData,
@@ -329,13 +329,13 @@ internal extension FileSyncable {
         }
         if let compression = compression,
             let zipData = jsonData.compress(algorithm: compression) {
-            FileSinki.cloudKitManager.deleteDataInCloud(fileURL: fileURL,
+            FileSinki.cloudKitManager?.deleteDataInCloud(fileURL: fileURL,
                                                         searchPathDirectory: searchPathDirectory,
                                                         originalItem: self,
                                                         data: zipData,
                                                         compression: compression)
         } else {
-            FileSinki.cloudKitManager.deleteDataInCloud(fileURL: fileURL,
+            FileSinki.cloudKitManager?.deleteDataInCloud(fileURL: fileURL,
                                                         searchPathDirectory: searchPathDirectory,
                                                         originalItem: self,
                                                         data: jsonData,

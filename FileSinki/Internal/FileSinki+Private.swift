@@ -14,9 +14,9 @@ import Foundation
 
 @objc public class FileSinki: NSObject {
     
-    internal static var cloudKitManager: CloudKitManager!
+    internal static var cloudKitManager: CloudKitManager?
     internal static let localDB = LocalDatabase()
-    internal static var observerManager: ObserverManager!
+    internal static var observerManager: ObserverManager?
     internal static var appSupportFolder: URL?
     internal static let reachability = ReachabilityManager()
 

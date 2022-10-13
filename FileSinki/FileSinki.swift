@@ -26,14 +26,14 @@ import Compression
     */
     @objc static func setup(cloudKitContainer: String) {
         cloudKitManager = CloudKitManager(cloudKitContainer: cloudKitContainer, localDB: localDB)
-        observerManager = ObserverManager(cloudKitManager: cloudKitManager, localDB: localDB)
+        observerManager = ObserverManager(cloudKitManager: cloudKitManager!, localDB: localDB)
     }
 
     /**
        Call FileSinki.didBecomeActive() in applicationDidBecomeActive in your AppDelegate to sync updates that happened while in the background
     */
     @objc static func didBecomeActive() {
-         FileSinki.observerManager.didBecomeActive()
+         FileSinki.observerManager?.didBecomeActive()
     }
 
     /**
@@ -42,7 +42,7 @@ import Compression
        - Parameter notificationPayload: The didReceiveRemoteNotification `userInfo: [String : Any]` payload received in AppDelegate
     */
     @objc static func receivedNotification(_ notificationPayload: [AnyHashable : Any]) {
-         FileSinki.observerManager.receivedNotification(notificationPayload)
+         FileSinki.observerManager?.receivedNotification(notificationPayload)
     }
 
 }
@@ -329,7 +329,7 @@ public extension FileSinki {
                                              path: String,
                                              root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
                                              itemsChanged: @escaping FileSinki.ChangeItem<T>.Changed) {
-        FileSinki.observerManager.addObserver(self, fileSyncableType: fileSyncableType,
+        FileSinki.observerManager?.addObserver(self, fileSyncableType: fileSyncableType,
                                               path: path, root: root, onChange: itemsChanged)
     }
 
@@ -352,7 +352,7 @@ public extension FileSinki {
                             path: String,
                             root: FileManager.SearchPathDirectory = .applicationSupportDirectory,
                             itemsChanged: @escaping FileSinki.GenericChanged) {
-        FileSinki.observerManager.addObserver(self, path: path, root: root, onChange: itemsChanged)
+        FileSinki.observerManager?.addObserver(self, path: path, root: root, onChange: itemsChanged)
     }
 
 }
