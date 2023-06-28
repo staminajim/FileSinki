@@ -793,6 +793,7 @@ internal final class CloudKitManager: NSObject {
 
             let subscription = CKQuerySubscription(recordType: CloudKitManager.fileSinkiRecordType,
                                                    predicate: predicate,
+                                                   subscriptionID: CKSubscription.ID("Remote Changes"),
                                                    options: [.firesOnRecordCreation,
                                                              .firesOnRecordUpdate,
                                                              .firesOnRecordDeletion])
