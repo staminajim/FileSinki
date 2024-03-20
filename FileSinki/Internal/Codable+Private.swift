@@ -46,10 +46,14 @@ internal extension Decodable {
                 localDecoded = decoded
                 localPayloadData = uncompressedData
             }
-        } else if let uncompressedData = try? Data(contentsOf: fileURL),
-                let decoded = try? JSONDecoder().decode(Self.self, from: uncompressedData) {
-            localDecoded = decoded
-            localPayloadData = uncompressedData
+        } else if let uncompressedData = try? Data(contentsOf: fileURL) {
+            do {
+                let decoded = try JSONDecoder().decode(Self.self, from: uncompressedData)
+                localDecoded = decoded
+                localPayloadData = uncompressedData
+            } catch let error {
+                DebugAssert(false, "\(fileURL.lastPathComponent) decode error: \(error)")
+            }
         }
 
         return (decoded: localDecoded, payloadData: localPayloadData)
