@@ -11,7 +11,6 @@
 		1A3C4052246764F70081AFEE /* ObserverManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C403A246764F70081AFEE /* ObserverManager.swift */; };
 		1A3C4053246764F70081AFEE /* URL+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C403B246764F70081AFEE /* URL+Private.swift */; };
 		1A3C4054246764F70081AFEE /* BinaryFileSyncable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C403C246764F70081AFEE /* BinaryFileSyncable.swift */; };
-		1A3C4055246764F70081AFEE /* AsyncDeduped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C403E246764F70081AFEE /* AsyncDeduped.swift */; };
 		1A3C4056246764F70081AFEE /* Threads.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C403F246764F70081AFEE /* Threads.swift */; };
 		1A3C4057246764F70081AFEE /* FileSyncable+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C4040246764F70081AFEE /* FileSyncable+Private.swift */; };
 		1A3C4058246764F70081AFEE /* FileSinki+Private.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A3C4041246764F70081AFEE /* FileSinki+Private.swift */; };
@@ -37,7 +36,6 @@
 		1A3C403A246764F70081AFEE /* ObserverManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObserverManager.swift; sourceTree = "<group>"; };
 		1A3C403B246764F70081AFEE /* URL+Private.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URL+Private.swift"; sourceTree = "<group>"; };
 		1A3C403C246764F70081AFEE /* BinaryFileSyncable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinaryFileSyncable.swift; sourceTree = "<group>"; };
-		1A3C403E246764F70081AFEE /* AsyncDeduped.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncDeduped.swift; sourceTree = "<group>"; };
 		1A3C403F246764F70081AFEE /* Threads.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Threads.swift; sourceTree = "<group>"; };
 		1A3C4040246764F70081AFEE /* FileSyncable+Private.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileSyncable+Private.swift"; sourceTree = "<group>"; };
 		1A3C4041246764F70081AFEE /* FileSinki+Private.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "FileSinki+Private.swift"; sourceTree = "<group>"; };
@@ -127,7 +125,6 @@
 		1A3C403D246764F70081AFEE /* Threads */ = {
 			isa = PBXGroup;
 			children = (
-				1A3C403E246764F70081AFEE /* AsyncDeduped.swift */,
 				1A3C403F246764F70081AFEE /* Threads.swift */,
 			);
 			path = Threads;
@@ -254,7 +251,6 @@
 				1A3C405A246764F70081AFEE /* Reachability.swift in Sources */,
 				1A3C4056246764F70081AFEE /* Threads.swift in Sources */,
 				1A3C4064246764F70081AFEE /* Codable+Compression.swift in Sources */,
-				1A3C4055246764F70081AFEE /* AsyncDeduped.swift in Sources */,
 				1A3C4062246764F70081AFEE /* FileSinki.swift in Sources */,
 				1A3C405B246764F70081AFEE /* LocalDatabase.swift in Sources */,
 				1A3C4054246764F70081AFEE /* BinaryFileSyncable.swift in Sources */,
